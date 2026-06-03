@@ -5,7 +5,6 @@ import { LearningPath } from "../components/LearningPath";
 import { ProgressDashboard } from "../components/ProgressDashboard";
 import { FeaturedProject } from "../components/FeaturedProject";
 import { ProjectList } from "../components/ProjectList";
-import { ProjectModal } from "../components/ProjectModal";
 
 export default function Home() {
   return (
@@ -31,7 +30,6 @@ export default function Home() {
           <p className="mt-1">数据采集技术课程项目</p>
         </div>
       </footer>
-      <ProjectModal />
     </div>
   );
 }

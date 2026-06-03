@@ -1,6 +1,6 @@
 import { Clock, Database, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { Project } from "../data/projects";
-import { useStore } from "../store/useStore";
 
 const difficultyColors = {
   入门: "bg-emerald-500/20 text-emerald-400",
@@ -9,12 +9,10 @@ const difficultyColors = {
 };
 
 export function ProjectCard({ project }: { project: Project }) {
-  const openModal = useStore((state) => state.openModal);
-
   return (
-    <div
-      onClick={() => openModal(project)}
-      className="group bg-dark-card rounded-2xl p-6 border border-dark-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+    <Link
+      to={`/project/${project.id}`}
+      className="group bg-dark-card rounded-2xl p-6 border border-dark-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 block"
     >
       <div className="flex items-start justify-between mb-4">
         <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/20 text-primary font-bold text-sm">
@@ -58,6 +56,6 @@ export function ProjectCard({ project }: { project: Project }) {
         开始练习
         <ArrowRight className="w-4 h-4" />
       </div>
-    </div>
+    </Link>
   );
 }
