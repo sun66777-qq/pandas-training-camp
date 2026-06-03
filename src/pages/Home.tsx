@@ -1,6 +1,7 @@
 import { Header } from "../components/Header";
 import { HeroSection } from "../components/HeroSection";
 import { FeatureCards } from "../components/FeatureCards";
+import { StageCards } from "../components/StageCards";
 import LearningPath from "../components/LearningPath";
 import { FeaturedProject } from "../components/FeaturedProject";
 import { ProjectList } from "../components/ProjectList";
@@ -27,19 +28,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div id="path" className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold gradient-text mb-4">
-                系统化学习路径
-              </h2>
-              <p className="text-text-secondary max-w-2xl mx-auto">
-                5个阶段循序渐进，从入门到精通
-              </p>
-            </div>
-            <LearningPath />
-          </div>
-        </div>
+        {/* 恢复原来的系统化学习路径卡片 */}
+        <StageCards />
 
         <div className="py-20">
           <div className="container mx-auto px-4">
@@ -84,6 +74,9 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* 新设计的学习路线图放在底部 */}
+        <LearningPath />
       </main>
 
       {/* Footer */}

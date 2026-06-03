@@ -1,209 +1,293 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Check, ArrowRight } from "lucide-react";
+import { Check } from "lucide-react";
 import { useProgressStore } from "../store/useProgressStore";
+import { projects as projectList } from "../data/projects";
 
-interface Node {
-  id: number;
-  name: string;
-  x: number;
-  y: number;
-}
-
-const nodes: Node[] = [
-  { id: 1, name: "数据预处理", x: 0, y: 0 },
-  { id: 2, name: "统计分析", x: 1, y: 0 },
-  { id: 3, name: "关联规则", x: 2, y: 0 },
-  { id: 4, name: "聚类分析", x: 3, y: 0 },
-  { id: 5, name: "RFM分层", x: 4, y: 0 },
-  { id: 6, name: "线性回归", x: 0, y: 1 },
-  { id: 7, name: "随机森林", x: 1, y: 1 },
-  { id: 8, name: "时间序列", x: 2, y: 1 },
-  { id: 9, name: "异常检测", x: 3, y: 1 },
-  { id: 10, name: "综合大项目", x: 4, y: 1 }
+// 项目在河流图上的位置
+const riverPositions = [
+  { id: 1, x: 10, y: 90 },
+  { id: 2, x: 22, y: 75 },
+  { id: 3, x: 34, y: 85 },
+  { id: 4, x: 46, y: 70 },
+  { id: 5, x: 58, y: 80 },
+  { id: 6, x: 70, y: 65 },
+  { id: 7, x: 62, y: 50 },
+  { id: 8, x: 50, y: 40 },
+  { id: 9, x: 38, y: 30 },
+  { id: 10, x: 90, y: 55 },
 ];
-
-const connections = [
-  { from: 1, to: 2 },
-  { from: 2, to: 3 },
-  { from: 3, to: 4 },
-  { from: 4, to: 5 },
-  { from: 5, to: 10 },
-  { from: 10, to: 9 },
-  { from: 9, to: 8 },
-  { from: 8, to: 7 },
-  { from: 7, to: 6 },
-  { from: 1, to: 6 }
-];
-
-const difficultyColors = {
-  1: "from-green-500 to-green-600",
-  2: "from-green-500 to-green-600",
-  3: "from-amber-500 to-amber-600",
-  4: "from-amber-500 to-amber-600",
-  5: "from-amber-500 to-amber-600",
-  6: "from-purple-500 to-purple-600",
-  7: "from-purple-500 to-purple-600",
-  8: "from-purple-500 to-purple-600",
-  9: "from-red-500 to-red-600",
-  10: "from-red-500 to-red-600"
-};
 
 export default function LearningPath() {
   const navigate = useNavigate();
-  const { projects } = useProgressStore();
-  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
+  const { projects: progressProjects } = useProgressStore();
+  const [hoveredProject, setHoveredProject] = useState<number | null>(null);
 
-  const getNodeState = (id: number) => {
-    const project = projects.find(p => p.id === id);
+  const getProjectState = (id: number) => {
+    const project = progressProjects.find((p) => p.id === id);
     if (project?.completed) return "completed";
-    if (id === 1 || projects.some(p => p.id < id && p.completed)) return "current";
+    if (id === 1 || (id > 1 && progressProjects.some((p) => p.id === id - 1 && p.completed))) return "current";
     return "pending";
   };
 
+  const getProjectInfo = (id: number) => {
+    return projectList.find((p) => p.id === id);
+  };
+
+  // 贝塞尔曲线的路径
+  const riverPath = "M 5 95 C 20 80 30 90 45 75 C 60 60 75 80 85 65";
+
   return (
-    <section className="py-12">
+    <section className="py-20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-10">
-          <h2 className="text-4xl font-bold gradient-text mb-3">
-            学习路线图
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold gradient-text mb-4">
+            进阶路线参考
           </h2>
-          <p className="text-text-secondary text-lg">
-            从基础到进阶的完整学习路径
+          <p className="text-text-secondary max-w-2xl mx-auto text-lg">
+            沿着河流探索，完成所有项目的学习之旅
           </p>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 overflow-x-auto">
-          <div className="min-w-[1200px]">
-            <svg viewBox="0 0 1000 300" className="w-full">
+        <div className="glass-card rounded-2xl p-8 overflow-hidden">
+          <div className="relative w-full h-[500px]">
+            {/* 背景渐变 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 to-purple-900/20 rounded-xl" />
+            
+            {/* SVG 河流图 */}
+            <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
               <defs>
-                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#00FFD1" />
-                  <stop offset="100%" stopColor="#A855F7" />
+                <linearGradient id="riverGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#EC4899" stopOpacity="1" />
                 </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <filter id="goldGlow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
               </defs>
 
-              {/* Connections */}
-              {connections.map((conn, idx) => {
-                const fromNode = nodes.find(n => n.id === conn.from)!;
-                const toNode = nodes.find(n => n.id === conn.to)!;
-                const fromX = 100 + fromNode.x * 200;
-                const fromY = 80 + fromNode.y * 140;
-                const toX = 100 + toNode.x * 200;
-                const toY = 80 + toNode.y * 140;
+              {/* 河流主路径 */}
+              <path
+                d={riverPath}
+                fill="none"
+                stroke="url(#riverGradient)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity="0.6"
+              />
 
-                return (
-                  <g key={idx}>
-                    <line
-                      x1={fromX} y1={fromY} x2={toX} y2={toY}
-                      stroke="url(#lineGradient)" strokeWidth="3"
-                      strokeDasharray="8, 4"
-                    />
-                    <circle
-                      cx={fromX + (toX - fromX) * 0.5}
-                      cy={fromY + (toY - fromY) * 0.5}
-                      r="4" fill="#00FFD1" opacity="0.6"
-                      className="animate-pulse"
-                    />
-                  </g>
-                );
-              })}
+              {/* 流动光点动画 */}
+              {[0, 1, 2, 3, 4].map((i) => (
+                <circle
+                  key={i}
+                  r="0.8"
+                  fill="#00FFD1"
+                  filter="url(#glow)"
+                >
+                  <animateMotion
+                    dur={`${6 + i * 1.5}s`}
+                    repeatCount="indefinite"
+                    path={riverPath}
+                    begin={`${-i * 1.2}s`}
+                  />
+                </circle>
+              ))}
 
-              {/* Nodes */}
-              {nodes.map((node) => {
-                const state = getNodeState(node.id);
-                const x = 100 + node.x * 200;
-                const y = 80 + node.y * 140;
+              {/* 项目节点 */}
+              {riverPositions.map((pos) => {
+                const state = getProjectState(pos.id);
+                const project = getProjectInfo(pos.id);
+                const isHovered = hoveredProject === pos.id;
+                
+                let fillColor = "#374151";
+                let strokeColor = "#4B5563";
+                let filter = "";
+                
+                if (state === "completed") {
+                  fillColor = "#FCD34D";
+                  strokeColor = "#F59E0B";
+                  filter = "url(#goldGlow)";
+                } else if (state === "current") {
+                  fillColor = "#00FFD1";
+                  strokeColor = "#06B6D4";
+                  filter = "url(#glow)";
+                }
 
                 return (
                   <g
-                    key={node.id}
-                    onMouseEnter={() => setHoveredNode(node.id)}
-                    onMouseLeave={() => setHoveredNode(null)}
-                    onClick={() => state !== "pending" && navigate(`/project/${node.id}`)}
-                    style={{ cursor: state === "pending" ? "default" : "pointer" }}
+                    key={pos.id}
+                    onMouseEnter={() => setHoveredProject(pos.id)}
+                    onMouseLeave={() => setHoveredProject(null)}
+                    onClick={() => navigate(`/project/${pos.id}`)}
+                    style={{ cursor: "pointer" }}
+                    className="transition-transform duration-300"
                   >
-                    <circle
-                      cx={x} cy={y} r={38}
-                      fill={state === "pending" ? "#1E1E2E" : state === "completed" ? "#10B981" : "#00FFD1"}
-                      stroke={state === "pending" ? "#4B5563" : state === "completed" ? "#10B981" : "#00FFD1"}
-                      strokeWidth={state === "current" ? "4" : "2"}
-                      opacity={state === "current" ? "1" : "0.9"}
-                      className={state === "current" ? "animate-glow-pulse" : ""}
-                    />
-
-                    {state === "completed" && (
-                      <circle cx={x} cy={y} r={30} fill="#0A0E27" />
+                    {/* 光晕效果 */}
+                    {(state === "completed" || state === "current") && (
+                      <circle
+                        cx={pos.x}
+                        cy={pos.y}
+                        r="5"
+                        fill={state === "completed" ? "#FCD34D" : "#00FFD1"}
+                        opacity="0.3"
+                        filter={filter}
+                      >
+                        <animate
+                          attributeName="r"
+                          values="5;8;5"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="opacity"
+                          values="0.3;0.1;0.3"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
                     )}
 
-                    {state === "completed" ? (
-                      <Check x={x - 12} y={y - 12} size={24} color="#10B981" />
-                    ) : (
+                    {/* 节点背景 */}
+                    <circle
+                      cx={pos.x}
+                      cy={pos.y}
+                      r="4"
+                      fill={fillColor}
+                      stroke={strokeColor}
+                      strokeWidth="1.5"
+                      filter={filter}
+                    />
+
+                    {/* 已完成的对勾 */}
+                    {state === "completed" && (
+                      <path
+                        d={`M ${pos.x - 1.5} ${pos.y} L ${pos.x - 0.3} ${pos.y + 1.2} L ${pos.x + 2} ${pos.y - 1.5}`}
+                        fill="none"
+                        stroke="#7C2D12"
+                        strokeWidth="0.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    )}
+
+                    {/* 项目编号 */}
+                    {state !== "completed" && (
                       <text
-                        x={x} y={y + 6} textAnchor="middle"
+                        x={pos.x}
+                        y={pos.y + 0.5}
+                        textAnchor="middle"
                         fill={state === "pending" ? "#9CA3AF" : "#0A0E27"}
-                        fontSize="20" fontWeight="bold"
+                        fontSize="2.2"
+                        fontWeight="bold"
                       >
-                        {node.id}
+                        {pos.id}
                       </text>
                     )}
 
+                    {/* 项目简短名称 */}
                     <text
-                      x={x} y={y + 55} textAnchor="middle"
+                      x={pos.x}
+                      y={pos.y + 7}
+                      textAnchor="middle"
                       fill={state === "pending" ? "#9CA3AF" : "#E6EDF3"}
-                      fontSize="14" fontWeight={state === "pending" ? "400" : "600"}
+                      fontSize="1.8"
+                      fontWeight={state === "pending" ? "400" : "600"}
                     >
-                      P{node.id} {node.name}
+                      {project?.name.slice(0, 4)}
                     </text>
-
-                    {hoveredNode === node.id && (
-                      <g>
-                        <rect
-                          x={x - 70} y={y - 100} width="140" height="50"
-                          rx="10"
-                          fill="#161B22" stroke="#00FFD1" strokeWidth="1"
-                        />
-                        <text
-                          x={x} y={y - 75} textAnchor="middle"
-                          fill="#E6EDF3" fontSize="12" fontWeight="bold"
-                        >
-                          {node.name}
-                        </text>
-                        <text
-                          x={x} y={y - 58} textAnchor="middle"
-                          fill={
-                            node.id <= 2 ? "#6EE7B7" :
-                            node.id <= 5 ? "#FBBF24" : "#F87171"
-                          }
-                          fontSize="10"
-                        >
-                          {node.id <= 2 ? "入门" : node.id <= 5 ? "进阶" : "高级"}
-                        </text>
-                      </g>
-                    )}
                   </g>
                 );
               })}
             </svg>
 
-            <div className="flex justify-center gap-8 mt-6 text-sm text-text-secondary">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-gray-500"></div>
-                <span>未开始</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-neon-cyan animate-glow-pulse"></div>
-                <span>进行中</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                <span>已完成</span>
-              </div>
-            </div>
+            {/* 悬浮卡片 */}
+            {hoveredProject && (() => {
+              const project = getProjectInfo(hoveredProject);
+              const state = getProjectState(hoveredProject);
+              const pos = riverPositions.find(p => p.id === hoveredProject);
+              if (!project || !pos) return null;
 
-            <div className="mt-4 text-center text-xs text-text-muted">
-              💡 提示：点击已完成或进行中的节点可以跳转到对应项目
+              return (
+                <div
+                  className="absolute glass-card rounded-xl p-4 shadow-lg z-50 pointer-events-none"
+                  style={{
+                    left: `${Math.min(Math.max(pos.x - 8, 0), 80)}%`,
+                    top: `${pos.y - 25}%`,
+                    transform: 'translate(-50%, -100%)'
+                  }}
+                >
+                  <div className="space-y-2 w-48">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-text-primary">
+                        P{hoveredProject} {project.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          project.difficulty === "入门"
+                            ? "bg-green-500/20 text-green-400"
+                            : project.difficulty === "进阶"
+                              ? "bg-amber-500/20 text-amber-400"
+                              : "bg-red-500/20 text-red-400"
+                        }`}
+                      >
+                        {project.difficulty}
+                      </span>
+                      <span className="text-xs text-text-secondary">
+                        {project.duration}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs font-medium ${
+                          state === "completed"
+                            ? "text-green-400"
+                            : state === "current"
+                              ? "text-neon-cyan"
+                              : "text-gray-400"
+                        }`}
+                      >
+                        {state === "completed" ? "✅ 已完成" : state === "current" ? "⏳ 进行中" : "⏸️ 未开始"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* 图例 */}
+          <div className="flex flex-wrap justify-center gap-8 mt-6 text-sm text-text-secondary">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-gray-500"></div>
+              <span>未开始</span>
             </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-neon-cyan animate-pulse"></div>
+              <span>进行中</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-amber-400"></div>
+              <span>已完成</span>
+            </div>
+          </div>
+
+          <div className="mt-4 text-center text-xs text-text-muted">
+            💡 提示：点击任意项目徽章可跳转到对应项目详情页
           </div>
         </div>
       </div>
