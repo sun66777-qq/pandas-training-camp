@@ -1,45 +1,40 @@
 import { Sparkles, BarChart3, GitBranch, TrendingUp, FileText } from "lucide-react";
 import { learningStages } from "../data/projects";
 
-const iconMap: Record<string, React.ElementType> = {
-  Sparkles,
-  BarChart3,
-  GitBranch,
-  TrendingUp,
-  FileText,
-};
-
 export function LearningPath() {
+  const icons = [Sparkles, BarChart3, GitBranch, TrendingUp, FileText];
+
   return (
-    <section className="py-20 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">系统化学习路径</h2>
-          <p className="text-slate-400">循序渐进，5个阶段掌握数据分析全栈技能</p>
+    <section id="path" className="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">系统化学习路径</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">五大阶段，循序渐进掌握数据分析</p>
         </div>
 
         <div className="relative">
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent transform -translate-y-1/2 hidden lg:block" />
+          {/* Timeline line (desktop only) */}
+          <div className="hidden md:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary-200 via-primary-300 to-primary-200 transform -translate-y-1/2"></div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             {learningStages.map((stage, index) => {
-              const Icon = iconMap[stage.icon];
+              const Icon = icons[index];
               return (
                 <div
                   key={stage.id}
-                  className="relative bg-dark-card rounded-2xl p-6 border border-dark-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 animate-slide-up"
+                  className="relative bg-white rounded-2xl p-6 border border-gray-100 shadow-card hover:shadow-cardHover hover:-translate-y-1 transition-all duration-300 animate-slide-up"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="absolute -top-4 left-6 w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
+                  <div className="absolute -top-4 left-6 w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-md hidden md:flex">
                     {stage.id}
                   </div>
 
-                  <div className="pt-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
-                      <Icon className="w-6 h-6 text-primary" />
+                  <div className="md:pt-4">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-50 flex items-center justify-center mb-5">
+                      <Icon className="w-7 h-7 text-primary-600" />
                     </div>
-                    <h3 className="font-semibold text-lg mb-2">{stage.title}</h3>
-                    <p className="text-slate-400 text-sm">{stage.description}</p>
+                    <h3 className="font-bold text-lg mb-2 text-gray-900">{stage.title}</h3>
+                    <p className="text-gray-600 text-sm">{stage.description}</p>
                   </div>
                 </div>
               );

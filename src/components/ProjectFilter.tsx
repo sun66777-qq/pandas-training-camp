@@ -15,8 +15,8 @@ export function ProjectFilter() {
           onClick={() => setFilter(f)}
           className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
             filter === f
-              ? "bg-primary text-white shadow-lg shadow-primary/25"
-              : "bg-dark-card text-slate-400 border border-dark-border hover:border-primary/50"
+              ? "bg-primary-600 text-white shadow-md"
+              : "bg-white border border-gray-200 text-gray-600 hover:border-primary-300 hover:text-primary-600"
           }`}
         >
           {f}
