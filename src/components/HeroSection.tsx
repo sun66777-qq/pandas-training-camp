@@ -87,7 +87,7 @@ export function HeroSection() {
             </div>
             <div className="glass-card rounded-2xl rounded-tl-sm p-4 text-left">
               <p className="text-text-primary text-sm md:text-base leading-relaxed">
-                大家好！我是来自广东科学技术职业学院的数据科学导师 👋
+                大家好！我是来自广东科学技术职业学院商务数据分析与应用专业的学生，欢迎和我一起学习 Pandas 数据分析！👋
               </p>
               <p className="text-text-secondary text-sm mt-2">
                 这门课程将带你从真实的商业数据集出发，通过10个实战项目，系统掌握Pandas数据分析技能！

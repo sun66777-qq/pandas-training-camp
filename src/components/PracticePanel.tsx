@@ -89,148 +89,146 @@ export default function PracticePanel({ projectId, practice }: PracticePanelProp
   };
 
   return (
-    <div className="flex gap-4 flex-col md:flex-row min-h-[600px] bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden">
-      {/* Left Panel: Instructions */}
-      <div className="w-full md:w-2/5 p-6 bg-white border-r border-gray-200 overflow-y-auto">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-            <Code className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900">实操练习</h3>
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 border border-green-200">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Python就绪
-            </span>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h4 className="font-semibold text-gray-900 mb-2">项目介绍</h4>
-          <p className="text-gray-600 text-sm">{practice.intro}</p>
-        </div>
-
-        <div className="mb-6">
-          <h4 className="font-semibold text-gray-900 mb-2">学习目标</h4>
-          <ul className="text-sm space-y-1">
-            {practice.goals.map((goal, idx) => (
-              <li key={idx} className="flex items-start gap-2">
-                <ArrowRight className="w-4 h-4 text-primary-500 mt-0.5 shrink-0" />
-                <span className="text-gray-600">{goal}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="mb-6">
-          <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <ListChecks className="w-4 h-4" />
-            步骤
-          </h4>
-          <div className="space-y-2">
-            {practice.steps.map((step, index) => (
-              <button
-                key={index}
-                onClick={() => handleStepClick(index)}
-                className={`w-full p-3 rounded-xl text-left transition-all ${
-                  activeStepIndex === index
-                    ? "bg-primary-50 border border-primary-200 shadow-sm"
-                    : "bg-gray-50 border border-transparent hover:bg-gray-100"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      completedSteps.includes(index)
-                        ? "bg-green-500 text-white"
-                        : activeStepIndex === index
-                        ? "bg-primary-500 text-white"
-                        : "bg-gray-300 text-gray-700"
-                    }`}
-                  >
-                    {completedSteps.includes(index) ? (
-                      <CheckCircle className="w-4 h-4" />
-                    ) : (
-                      index + 1
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900 text-sm">
-                      {step.title}
-                    </div>
-                  </div>
-                </div>
-                {activeStepIndex === index && (
-                  <div className="mt-3 pl-9 text-gray-600 text-xs">
-                    {step.description}
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-          <div className="flex items-start gap-2">
-            <Lightbulb className="w-5 h-5 text-yellow-600 mt-0.5" />
+    <div className="flex gap-6 flex-col md:flex-row min-h-[600px]">
+      {/* Left Panel: Instructions - 30% */}
+      <div className="w-full md:w-3/10">
+        <div className="glass-card rounded-2xl p-6 sticky top-24">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center">
+              <Code className="w-5 h-5 text-dark-bg" />
+            </div>
             <div>
-              <h5 className="font-medium text-yellow-800 text-sm">提示</h5>
-              <ul className="mt-1 text-yellow-700 text-xs space-y-1">
-                {practice.tips.map((tip, i) => (
-                  <li key={i}>• {tip}</li>
-                ))}
-              </ul>
+              <h3 className="font-bold text-text-primary">实操练习</h3>
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Python就绪
+              </span>
             </div>
           </div>
-        </div>
 
-        <div className="mt-4">
-          <button
-            onClick={handleLoadExample}
-            className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white text-sm py-2 px-4 rounded-lg transition-colors"
-          >
-            <Code className="w-4 h-4" />
-            加载完整示例代码
-          </button>
+          <div className="mb-6">
+            <h4 className="font-semibold text-text-primary mb-2">项目介绍</h4>
+            <p className="text-text-secondary text-sm">{practice.intro}</p>
+          </div>
+
+          <div className="mb-6">
+            <h4 className="font-semibold text-text-primary mb-2">学习目标</h4>
+            <ul className="text-sm space-y-1">
+              {practice.goals.map((goal, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <ArrowRight className="w-4 h-4 text-neon-cyan mt-0.5 shrink-0" />
+                  <span className="text-text-secondary">{goal}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mb-6">
+            <h4 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+              <ListChecks className="w-4 h-4" />
+              步骤
+            </h4>
+            <div className="space-y-2">
+              {practice.steps.map((step, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleStepClick(index)}
+                  className={`w-full p-3 rounded-xl text-left transition-all ${
+                    activeStepIndex === index
+                      ? "bg-neon-cyan/10 border border-neon-cyan/30"
+                      : "bg-dark-card-hover border border-transparent hover:border-dark-border"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        completedSteps.includes(index)
+                          ? "bg-emerald-500 text-dark-bg"
+                          : activeStepIndex === index
+                          ? "bg-gradient-to-br from-neon-cyan to-neon-purple text-dark-bg"
+                          : "bg-dark-border text-text-secondary"
+                      }`}
+                    >
+                      {completedSteps.includes(index) ? (
+                        <CheckCircle className="w-4 h-4" />
+                      ) : (
+                        index + 1
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-text-primary text-sm">
+                        {step.title}
+                      </div>
+                    </div>
+                  </div>
+                  {activeStepIndex === index && (
+                    <div className="mt-3 pl-9 text-text-secondary text-xs">
+                      {step.description}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+            <div className="flex items-start gap-2">
+              <Lightbulb className="w-5 h-5 text-amber-400 mt-0.5" />
+              <div>
+                <h5 className="font-medium text-amber-300 text-sm">提示</h5>
+                <ul className="mt-1 text-text-secondary text-xs space-y-1">
+                  {practice.tips.map((tip, i) => (
+                    <li key={i}>• {tip}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <button
+              onClick={handleLoadExample}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-neon-cyan to-neon-purple hover:shadow-glow text-dark-bg text-sm py-2 px-4 rounded-xl transition-all"
+            >
+              <Code className="w-4 h-4" />
+              加载完整示例代码
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Right Panel: Code Editor */}
-      <div className="flex-1 bg-gray-900 flex flex-col">
-        <div className="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            </div>
-            <span className="text-gray-400 text-xs ml-2">
-              practice-{projectId}.py
-            </span>
-          </div>
+      {/* Right Panel: Code Editor - 70% */}
+      <div className="w-full md:w-7/10 glass-card rounded-2xl overflow-hidden flex flex-col">
+        <div className="px-4 py-3 border-b border-dark-border flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+          <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+          <span className="text-text-secondary text-xs ml-2">
+            practice-{projectId}.py
+          </span>
         </div>
 
         <div className="flex-1 flex flex-col">
           <textarea
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            className="flex-1 bg-gray-900 text-gray-100 font-mono text-sm p-4 resize-none focus:outline-none"
+            className="flex-1 bg-dark-bg text-neon-cyan font-mono text-sm p-4 resize-none focus:outline-none"
             spellCheck="false"
             placeholder="# 在这输入Python代码..."
           />
         </div>
 
-        <div className="border-t border-gray-700 p-3 flex gap-2">
+        <div className="border-t border-dark-border p-4 flex gap-3">
           <button
             onClick={handleRun}
-            className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-4 rounded-lg transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-neon-cyan to-neon-purple hover:shadow-glow text-dark-bg text-sm py-3 px-4 rounded-xl font-semibold transition-all"
           >
             <Play className="w-4 h-4" />
             运行 / 检查
           </button>
           <button
             onClick={handleReset}
-            className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white text-sm py-2 px-4 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 bg-dark-card-hover border border-dark-border text-text-primary text-sm py-3 px-4 rounded-xl hover:bg-dark-border transition-all"
           >
             <RotateCcw className="w-4 h-4" />
             重置
@@ -238,12 +236,12 @@ export default function PracticePanel({ projectId, practice }: PracticePanelProp
         </div>
 
         {output && (
-          <div className="border-t border-gray-700 bg-gray-800 p-4">
-            <div className="flex items-center gap-2 text-gray-400 text-xs mb-2">
+          <div className="border-t border-dark-border bg-dark-card-hover p-4">
+            <div className="flex items-center gap-2 text-text-secondary text-xs mb-2">
               <Terminal className="w-4 h-4" />
               <span>输出 / 提示</span>
             </div>
-            <pre className="text-green-400 text-sm whitespace-pre-wrap">
+            <pre className="text-emerald-400 text-sm whitespace-pre-wrap">
               {output}
             </pre>
           </div>
