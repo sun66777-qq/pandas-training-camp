@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Clock, Database, Check, X, ChevronDown, ChevronUp, BookOpen, Code2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Clock, Database, Check, X, ChevronDown, ChevronUp, BookOpen, Code2, CheckCircle2, AlertCircle } from "lucide-react";
 import { projects } from "../data/projects";
 import { projectDetails } from "../data/projectDetails";
 import { useProgressStore } from "../store/useProgressStore";
 import PracticePanel from "../components/PracticePanel";
+import CommonErrors from "../components/CommonErrors";
 
 const difficultyColors = {
   入门: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
@@ -22,6 +23,7 @@ export default function ProjectDetail() {
   const [expandedQuiz, setExpandedQuiz] = useState<Record<string, boolean>>({});
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
+  const [expandedExplanations, setExpandedExplanations] = useState<Record<number, boolean>>({});
 
   const project = projects.find((p) => p.id === Number(id));
   const detail = project ? projectDetails[project.id] : null;
@@ -77,6 +79,10 @@ export default function ProjectDetail() {
     if (score >= 80) {
       updateProjectProgress(project.id, true, score);
     }
+  };
+
+  const toggleExplanation = (questionId: number) => {
+    setExpandedExplanations((prev) => ({ ...prev, [questionId]: !prev[questionId] }));
   };
 
   return (
@@ -266,6 +272,7 @@ export default function ProjectDetail() {
         {activeTab === "practice" && (
           <div className="max-w-full">
             <PracticePanel projectId={project.id} practice={detail.practice} />
+            <CommonErrors projectId={project.id} />
           </div>
         )}
 
@@ -374,8 +381,15 @@ export default function ProjectDetail() {
                         </div>
                       )}
 
-                      {showResults && (
-                        <div className="mt-4 p-4 bg-neon-cyan/10 rounded-xl border border-neon-cyan/20">
+                      <button
+                        onClick={() => toggleExplanation(q.id)}
+                        className="mt-4 text-sm text-neon-cyan hover:text-neon-purple transition-colors flex items-center gap-1"
+                      >
+                        {expandedExplanations[q.id] ? "收起解析" : "查看解析"}
+                      </button>
+
+                      {(showResults || expandedExplanations[q.id]) && (
+                        <div className="mt-3 p-4 bg-neon-cyan/10 rounded-xl border border-neon-cyan/20">
                           <p className="text-neon-cyan font-medium mb-1">答案解析</p>
                           <p className="text-text-secondary text-sm">{q.explanation}</p>
                         </div>

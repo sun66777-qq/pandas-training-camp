@@ -1,158 +1,212 @@
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Sparkles, BookOpen, FileText, TrendingUp, Award } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
+import { useProgressStore } from "../store/useProgressStore";
 
-const stages = [
-  {
-    icon: BookOpen,
-    title: "基础入门",
-    skills: ["Pandas基础", "数据加载", "数据查看"],
-    color: "from-neon-cyan to-primary-500",
-  },
-  {
-    icon: FileText,
-    title: "数据清洗",
-    skills: ["缺失值处理", "重复值处理", "类型转换"],
-    color: "from-neon-purple to-neon-orange",
-  },
-  {
-    icon: TrendingUp,
-    title: "数据分析",
-    skills: ["筛选排序", "分组聚合", "透视表"],
-    color: "from-neon-yellow to-neon-orange",
-  },
-  {
-    icon: Sparkles,
-    title: "高级应用",
-    skills: ["特征工程", "数据可视化", "统计建模"],
-    color: "from-neon-orange to-neon-cyan",
-  },
-  {
-    icon: Award,
-    title: "项目实战",
-    skills: ["关联规则", "聚类分析", "预测建模"],
-    color: "from-primary-500 to-neon-purple",
-  },
+interface Node {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+}
+
+const nodes: Node[] = [
+  { id: 1, name: "数据预处理", x: 0, y: 0 },
+  { id: 2, name: "统计分析", x: 1, y: 0 },
+  { id: 3, name: "关联规则", x: 2, y: 0 },
+  { id: 4, name: "聚类分析", x: 3, y: 0 },
+  { id: 5, name: "RFM分层", x: 4, y: 0 },
+  { id: 6, name: "线性回归", x: 0, y: 1 },
+  { id: 7, name: "随机森林", x: 1, y: 1 },
+  { id: 8, name: "时间序列", x: 2, y: 1 },
+  { id: 9, name: "异常检测", x: 3, y: 1 },
+  { id: 10, name: "综合大项目", x: 4, y: 1 }
 ];
 
-export function LearningPath() {
-  const [activeStage, setActiveStage] = useState(0);
+const connections = [
+  { from: 1, to: 2 },
+  { from: 2, to: 3 },
+  { from: 3, to: 4 },
+  { from: 4, to: 5 },
+  { from: 5, to: 10 },
+  { from: 10, to: 9 },
+  { from: 9, to: 8 },
+  { from: 8, to: 7 },
+  { from: 7, to: 6 },
+  { from: 1, to: 6 }
+];
 
-  const currentStage = stages[activeStage];
-  const CurrentIcon = currentStage.icon;
+const difficultyColors = {
+  1: "from-green-500 to-green-600",
+  2: "from-green-500 to-green-600",
+  3: "from-amber-500 to-amber-600",
+  4: "from-amber-500 to-amber-600",
+  5: "from-amber-500 to-amber-600",
+  6: "from-purple-500 to-purple-600",
+  7: "from-purple-500 to-purple-600",
+  8: "from-purple-500 to-purple-600",
+  9: "from-red-500 to-red-600",
+  10: "from-red-500 to-red-600"
+};
+
+export default function LearningPath() {
+  const navigate = useNavigate();
+  const { projects } = useProgressStore();
+  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
+
+  const getNodeState = (id: number) => {
+    const project = projects.find(p => p.id === id);
+    if (project?.completed) return "completed";
+    if (id === 1 || projects.some(p => p.id < id && p.completed)) return "current";
+    return "pending";
+  };
 
   return (
-    <div className="relative">
-      {/* Timeline Container */}
-      <div className="relative overflow-x-auto pb-4">
-        <div className="flex items-center justify-between gap-4 min-w-max md:min-w-0 md:justify-center">
-          {stages.map((stage, idx) => (
-            <div key={idx} className="relative flex-shrink-0">
-              {/* Connector Line */}
-              {idx < stages.length - 1 && (
-                <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-dark-border z-0">
-                  <div className="absolute inset-0 bg-gradient-to-r from-neon-cyan to-neon-purple animate-flow-right" />
-                </div>
-              )}
+    <section className="py-12">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-10">
+          <h2 className="text-4xl font-bold gradient-text mb-3">
+            学习路线图
+          </h2>
+          <p className="text-text-secondary text-lg">
+            从基础到进阶的完整学习路径
+          </p>
+        </div>
 
-              {/* Stage Card */}
-              <div
-                className={`relative z-10 w-48 glass-card-hover rounded-2xl p-6 cursor-pointer transition-all ${
-                  activeStage === idx
-                    ? "ring-2 ring-neon-cyan shadow-glow-lg"
-                    : ""
-                }`}
-                onClick={() => setActiveStage(idx)}
-                onMouseEnter={() => setActiveStage(idx)}
-              >
-                {/* Node Number */}
-                <div
-                  className={`w-16 h-16 rounded-full bg-gradient-to-br ${stage.color} p-1 mx-auto mb-4 transition-transform ${
-                    activeStage === idx ? "scale-110" : ""
-                  }`}
-                >
-                  <div className="w-full h-full rounded-full bg-dark-card flex items-center justify-center">
-                    <stage.icon className="w-7 h-7 text-white" />
-                  </div>
-                </div>
+        <div className="glass-card rounded-2xl p-6 overflow-x-auto">
+          <div className="min-w-[1200px]">
+            <svg viewBox="0 0 1000 300" className="w-full">
+              <defs>
+                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#00FFD1" />
+                  <stop offset="100%" stopColor="#A855F7" />
+                </linearGradient>
+              </defs>
 
-                {/* Title */}
-                <h4 className="text-center font-bold text-text-primary mb-3">
-                  {stage.title}
-                </h4>
+              {/* Connections */}
+              {connections.map((conn, idx) => {
+                const fromNode = nodes.find(n => n.id === conn.from)!;
+                const toNode = nodes.find(n => n.id === conn.to)!;
+                const fromX = 100 + fromNode.x * 200;
+                const fromY = 80 + fromNode.y * 140;
+                const toX = 100 + toNode.x * 200;
+                const toY = 80 + toNode.y * 140;
 
-                {/* Skills Tags */}
-                <div className="flex flex-wrap gap-1 justify-center">
-                  {stage.skills.map((skill, skillIdx) => (
-                    <span
-                      key={skillIdx}
-                      className="px-2 py-1 text-xs bg-dark-card-hover rounded-full text-text-secondary"
+                return (
+                  <g key={idx}>
+                    <line
+                      x1={fromX} y1={fromY} x2={toX} y2={toY}
+                      stroke="url(#lineGradient)" strokeWidth="3"
+                      strokeDasharray="8, 4"
+                    />
+                    <circle
+                      cx={fromX + (toX - fromX) * 0.5}
+                      cy={fromY + (toY - fromY) * 0.5}
+                      r="4" fill="#00FFD1" opacity="0.6"
+                      className="animate-pulse"
+                    />
+                  </g>
+                );
+              })}
+
+              {/* Nodes */}
+              {nodes.map((node) => {
+                const state = getNodeState(node.id);
+                const x = 100 + node.x * 200;
+                const y = 80 + node.y * 140;
+
+                return (
+                  <g
+                    key={node.id}
+                    onMouseEnter={() => setHoveredNode(node.id)}
+                    onMouseLeave={() => setHoveredNode(null)}
+                    onClick={() => state !== "pending" && navigate(`/project/${node.id}`)}
+                    style={{ cursor: state === "pending" ? "default" : "pointer" }}
+                  >
+                    <circle
+                      cx={x} cy={y} r={38}
+                      fill={state === "pending" ? "#1E1E2E" : state === "completed" ? "#10B981" : "#00FFD1"}
+                      stroke={state === "pending" ? "#4B5563" : state === "completed" ? "#10B981" : "#00FFD1"}
+                      strokeWidth={state === "current" ? "4" : "2"}
+                      opacity={state === "current" ? "1" : "0.9"}
+                      className={state === "current" ? "animate-glow-pulse" : ""}
+                    />
+
+                    {state === "completed" && (
+                      <circle cx={x} cy={y} r={30} fill="#0A0E27" />
+                    )}
+
+                    {state === "completed" ? (
+                      <Check x={x - 12} y={y - 12} size={24} color="#10B981" />
+                    ) : (
+                      <text
+                        x={x} y={y + 6} textAnchor="middle"
+                        fill={state === "pending" ? "#9CA3AF" : "#0A0E27"}
+                        fontSize="20" fontWeight="bold"
+                      >
+                        {node.id}
+                      </text>
+                    )}
+
+                    <text
+                      x={x} y={y + 55} textAnchor="middle"
+                      fill={state === "pending" ? "#9CA3AF" : "#E6EDF3"}
+                      fontSize="14" fontWeight={state === "pending" ? "400" : "600"}
                     >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+                      P{node.id} {node.name}
+                    </text>
 
-                {/* Active Indicator */}
-                {activeStage === idx && (
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-neon-cyan rotate-45" />
-                )}
+                    {hoveredNode === node.id && (
+                      <g>
+                        <rect
+                          x={x - 70} y={y - 100} width="140" height="50"
+                          rx="10"
+                          fill="#161B22" stroke="#00FFD1" strokeWidth="1"
+                        />
+                        <text
+                          x={x} y={y - 75} textAnchor="middle"
+                          fill="#E6EDF3" fontSize="12" fontWeight="bold"
+                        >
+                          {node.name}
+                        </text>
+                        <text
+                          x={x} y={y - 58} textAnchor="middle"
+                          fill={
+                            node.id <= 2 ? "#6EE7B7" :
+                            node.id <= 5 ? "#FBBF24" : "#F87171"
+                          }
+                          fontSize="10"
+                        >
+                          {node.id <= 2 ? "入门" : node.id <= 5 ? "进阶" : "高级"}
+                        </text>
+                      </g>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+
+            <div className="flex justify-center gap-8 mt-6 text-sm text-text-secondary">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-gray-500"></div>
+                <span>未开始</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-neon-cyan animate-glow-pulse"></div>
+                <span>进行中</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                <span>已完成</span>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Current Stage Info */}
-      <div className="mt-12 glass-card rounded-2xl p-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div
-            className={`w-12 h-12 rounded-full bg-gradient-to-br ${currentStage.color} p-1`}
-          >
-            <div className="w-full h-full rounded-full bg-dark-card flex items-center justify-center">
-              <CurrentIcon className="w-6 h-6 text-white" />
+            <div className="mt-4 text-center text-xs text-text-muted">
+              💡 提示：点击已完成或进行中的节点可以跳转到对应项目
             </div>
           </div>
-          <div>
-            <h3 className="text-2xl font-bold text-text-primary">
-              第 {activeStage + 1} 阶段：{currentStage.title}
-            </h3>
-            <p className="text-text-secondary">
-              掌握技能：{currentStage.skills.join("、")}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          {currentStage.skills.map((skill, idx) => (
-            <div
-              key={idx}
-              className="glass-card rounded-xl p-4 hover:bg-dark-card-hover transition-colors"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-neon-cyan" />
-                <span className="font-semibold text-text-primary">{skill}</span>
-              </div>
-              <p className="text-xs text-text-secondary">
-                {skill === "Pandas基础" && "学习DataFrame和Series的基本操作"}
-                {skill === "数据加载" && "从CSV、Excel等文件读取数据"}
-                {skill === "数据查看" && "使用head、tail、describe等方法"}
-                {skill === "缺失值处理" && "检测和填充缺失值"}
-                {skill === "重复值处理" && "识别和删除重复记录"}
-                {skill === "类型转换" && "转换数据类型"}
-                {skill === "筛选排序" && "条件筛选和数据排序"}
-                {skill === "分组聚合" && "groupby和聚合函数"}
-                {skill === "透视表" && "创建数据透视表"}
-                {skill === "特征工程" && "创建和转换特征"}
-                {skill === "数据可视化" && "绑定matplotlib和seaborn"}
-                {skill === "统计建模" && "基础统计分析和建模"}
-                {skill === "关联规则" && "Apriori算法"}
-                {skill === "聚类分析" && "K-Means算法"}
-                {skill === "预测建模" && "回归和分类基础"}
-              </p>
-            </div>
-          ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

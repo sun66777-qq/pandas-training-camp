@@ -1,7 +1,7 @@
 import { Header } from "../components/Header";
 import { HeroSection } from "../components/HeroSection";
 import { FeatureCards } from "../components/FeatureCards";
-import { LearningPath } from "../components/LearningPath";
+import LearningPath from "../components/LearningPath";
 import { FeaturedProject } from "../components/FeaturedProject";
 import { ProjectList } from "../components/ProjectList";
 import { DataDashboard } from "../components/DataDashboard";
