@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Database, Tag, Check, X, ChevronDown, ChevronUp, Book
 import { projects } from "../data/projects";
 import { projectDetails } from "../data/projectDetails";
 import { useProgressStore } from "../store/useProgressStore";
+import PracticePanel from "../components/PracticePanel";
 
 const difficultyColors = {
   入门: "bg-emerald-100 text-emerald-700",
@@ -21,9 +22,6 @@ export default function ProjectDetail() {
   const [expandedQuiz, setExpandedQuiz] = useState<Record<string, boolean>>({});
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
-  const [practiceCode, setPracticeCode] = useState("");
-  const [showReference, setShowReference] = useState(false);
-  const [checkResult, setCheckResult] = useState("");
 
   const project = projects.find((p) => p.id === Number(id));
   const detail = project ? projectDetails[project.id] : null;
@@ -79,14 +77,6 @@ export default function ProjectDetail() {
     if (score >= 80) {
       updateProjectProgress(project.id, true, score);
     }
-  };
-
-  const handleCheckPractice = () => {
-    setCheckResult(detail.practice.feedback);
-  };
-
-  const handleViewReference = () => {
-    setShowReference(true);
   };
 
   return (
@@ -256,56 +246,8 @@ export default function ProjectDetail() {
 
         {/* Practice module */}
         {activeTab === "practice" && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-card">
-              <h2 className="text-xl font-bold mb-4 text-gray-900">代码练习</h2>
-              <p className="text-gray-600 mb-6">
-                请在下方代码编辑器中补充或修改 <code className="bg-gray-100 px-1 py-0.5 rounded text-primary-700"># TODO</code> 部分的代码。
-                点击检查按钮获取反馈，或者查看完整参考代码。
-              </p>
-
-              <div className="bg-gray-900 rounded-xl p-4 mb-6">
-                <textarea
-                  value={practiceCode || detail.practice.starterCode}
-                  onChange={(e) => setPracticeCode(e.target.value)}
-                  className="w-full h-80 bg-transparent font-mono text-sm text-gray-100 resize-none focus:outline-none"
-                  placeholder="在此输入代码..."
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-3 mb-6">
-                <button
-                  onClick={handleCheckPractice}
-                  className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-semibold hover:from-primary-700 hover:to-primary-800 hover:-translate-y-0.5 shadow-card hover:shadow-cardLifted transition-all"
-                >
-                  运行 / 检查
-                </button>
-                <button
-                  onClick={handleViewReference}
-                  className="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:-translate-y-0.5 shadow-card hover:shadow-cardLifted transition-all"
-                >
-                  查看参考答案
-                </button>
-              </div>
-
-              {checkResult && (
-                <div className="p-4 bg-accent-50 border border-accent-200 rounded-xl mb-6">
-                  <p className="text-accent-700 font-medium mb-1">反馈结果</p>
-                  <p className="text-gray-700 text-sm">{checkResult}</p>
-                </div>
-              )}
-
-              {showReference && (
-                <div>
-                  <p className="text-gray-700 font-medium mb-3">参考答案</p>
-                  <div className="bg-gray-900 rounded-xl p-4 overflow-x-auto">
-                    <pre className="font-mono text-sm text-gray-100">
-                      <code>{detail.practice.referenceCode}</code>
-                    </pre>
-                  </div>
-                </div>
-              )}
-            </div>
+          <div className="max-w-7xl mx-auto">
+            <PracticePanel projectId={project.id} practice={detail.practice} />
           </div>
         )}
 
