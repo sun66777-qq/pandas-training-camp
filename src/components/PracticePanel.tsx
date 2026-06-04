@@ -207,6 +207,29 @@ export default function PracticePanel({ projectId, practice }: PracticePanelProp
             practice-{projectId}.py
           </span>
         </div>
+        
+        {/* Step Details */}
+        <div className="p-4 border-b border-dark-border bg-dark-card-hover">
+          <h3 className="font-bold text-text-primary mb-2">
+            {practice.steps[activeStepIndex].title}
+          </h3>
+          <div className="mb-3">
+            <span className="text-xs font-medium text-neon-cyan mb-1 block">🎯 本步骤目标</span>
+            <p className="text-text-secondary text-sm">{practice.steps[activeStepIndex].goal}</p>
+          </div>
+          <div className="mb-3">
+            <span className="text-xs font-medium text-neon-cyan mb-1 block">📋 操作指引</span>
+            <ul className="text-text-secondary text-sm space-y-1 ml-4">
+              {practice.steps[activeStepIndex].instructions.map((inst, i) => (
+                <li key={i} className="list-disc">{inst}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <span className="text-xs font-medium text-neon-cyan mb-1 block">📤 预期输出</span>
+            <p className="text-text-secondary text-sm italic">{practice.steps[activeStepIndex].expectedOutput}</p>
+          </div>
+        </div>
 
         <div className="flex-1 flex flex-col">
           <textarea

@@ -10,7 +10,10 @@ export interface QuizQuestion {
 export interface PracticeStep {
   title: string;
   description: string;
+  goal: string;
+  instructions: string[];
   code: string;
+  expectedOutput: string;
   feedback: string;
 }
 
@@ -41,170 +44,358 @@ export interface ProjectDetail {
   test: QuizQuestion[];
 }
 
-const defaultPractice = {
-  intro: "在这个项目中，你将通过实际练习来巩固Pandas核心技能。",
-  goals: ["掌握数据加载", "学会数据清洗", "能够进行基础分析"],
-  steps: [
+const project1Details: ProjectDetail = {
+  learning: [
     {
-      title: "步骤1：导入库并加载数据",
-      description: "首先导入必要的库，然后加载示例数据集。",
-      code: "import pandas as pd\n\n# 加载数据\ndf = pd.read_csv('data.csv')\nprint(df.head())",
-      feedback: "很好！数据加载成功。接下来进行数据清洗。"
+      title: "缺失值检测与填充",
+      content: "缺失值是数据清洗中最常见的问题。首先用isnull().sum()统计每列缺失数量，然后根据业务场景选择填充策略：数值列用均值/中位数，分类列用众数，时间序列用ffill/bfill。",
+      codeExample: "import pandas as pd\nimport numpy as np\n\n# 统计缺失值\nprint(df.isnull().sum())\n\n# 数值列用均值填充\ndf['price'] = df['price'].fillna(df['price'].mean())\n\n# 分类列用众数填充\ndf['category'] = df['category'].fillna(df['category'].mode()[0])",
+      quiz: [
+        { 
+          question: "统计每列缺失值数量的方法是？", 
+          options: ["df.isnull()", "df.isnull().sum()", "df.count()", "df.missing()"], 
+          answer: "B", 
+          explanation: "isnull()返回布尔值DataFrame，sum()后得到每列True的数量，即缺失值个数。" 
+        }
+      ]
     },
     {
-      title: "步骤2：探索数据结构",
-      description: "查看数据的基本信息，包括形状、类型等。",
-      code: "# 查看数据基本信息\nprint(df.shape)\nprint(df.info())\nprint(df.describe())",
-      feedback: "完美！你已经了解了数据的基本结构。"
+      title: "重复数据删除",
+      content: "重复数据会影响分析结果。用duplicated()检查重复行，用drop_duplicates()删除。可以指定subset参数只检查特定列，keep参数控制保留哪一行。",
+      codeExample: "# 检查重复行\nprint(df.duplicated().sum())\n\n# 删除重复行，保留第一次出现的\ndf = df.drop_duplicates(keep='first')\n\n# 只检查订单ID列的重复\ndf = df.drop_duplicates(subset=['order_id'], keep='last')",
+      quiz: [
+        { 
+          question: "删除重复行时，保留最后一行的参数是？", 
+          options: ["keep='first'", "keep='last'", "keep=False", "keep='all'"], 
+          answer: "B", 
+          explanation: "keep='last'保留最后一次出现的行，keep='first'保留第一次出现的。" 
+        }
+      ]
     },
     {
-      title: "步骤3：进行基础分析",
-      description: "尝试一些简单的分析操作，比如筛选、分组等。",
-      code: "# 基础分析示例\nprint(df.groupby('category').size())",
-      feedback: "太棒了！你已经完成了基础分析！"
+      title: "数据类型转换",
+      content: "正确的数据类型对分析至关重要。用astype()转换基本类型，用pd.to_datetime()处理日期，用pd.to_numeric()处理数值（errors='coerce'将无法转换的值设为NaN）。",
+      codeExample: "# 字符串转数值\ndf['price'] = pd.to_numeric(df['price'], errors='coerce')\n\n# 字符串转日期\ndf['order_date'] = pd.to_datetime(df['order_date'])\n\n# 整数转浮点数\ndf['quantity'] = df['quantity'].astype(float)",
+      quiz: [
+        { 
+          question: "将字符串转为日期类型用什么方法？", 
+          answer: "pd.to_datetime()", 
+          explanation: "pd.to_datetime()可以将多种格式的日期字符串转换为datetime类型。" 
+        }
+      ]
+    },
+    {
+      title: "异常值初步处理",
+      content: "用IQR方法检测异常值：Q1是25分位数，Q3是75分位数，IQR=Q3-Q1，异常值定义为<Q1-1.5*IQR或>Q3+1.5*IQR。可以选择删除或用边界值替换。",
+      codeExample: "Q1 = df['price'].quantile(0.25)\nQ3 = df['price'].quantile(0.75)\nIQR = Q3 - Q1\n\n# 找出异常值\noutliers = df[(df['price'] < Q1 - 1.5*IQR) | (df['price'] > Q3 + 1.5*IQR)]\n\n# 用边界值替换\nlower_bound = Q1 - 1.5*IQR\nupper_bound = Q3 + 1.5*IQR\ndf['price'] = df['price'].clip(lower=lower_bound, upper=upper_bound)",
+      quiz: [
+        { 
+          question: "IQR方法中，异常值边界是？", 
+          options: ["Q1±1.5*IQR", "Q3±1.5*IQR", "Q1-1.5*IQR 和 Q3+1.5*IQR", "平均值±标准差"], 
+          answer: "C", 
+          explanation: "小于Q1-1.5*IQR或大于Q3+1.5*IQR的值被视为异常值。" 
+        }
+      ]
+    },
+    {
+      title: "数据标准化格式",
+      content: "统一数据格式是分析的基础。字符串列统一大小写、去除空格，分类列合并同义类别，数值列统一单位。",
+      codeExample: "# 去除字符串首尾空格\ndf['product_name'] = df['product_name'].str.strip()\n\n# 统一为小写\ndf['category'] = df['category'].str.lower()\n\n# 合并同义类别\ndf['category'] = df['category'].replace({'electronics': '电子产品', 'digital': '电子产品'})",
+      quiz: [
+        { 
+          question: "去除字符串首尾空格用什么方法？", 
+          answer: "str.strip()", 
+          explanation: "str.strip()去除字符串首尾的空格和换行符。" 
+        }
+      ]
     }
   ],
-  tips: ["备份数据是个好习惯", "遇到问题查官方文档", "先看示例再动手"],
-  referenceCode: "import pandas as pd\n\ndf = pd.read_csv('data.csv')\nprint(df.head())\nprint(df.describe())",
-  feedback: "项目完成！你已经掌握了基础技能！"
+  practice: {
+    intro: "本项目将带你完成一份零售订单数据的完整清洗流程，从原始数据到分析就绪的数据。",
+    goals: [
+      "掌握缺失值检测和填充方法",
+      "学会删除重复数据",
+      "熟练转换数据类型",
+      "能够处理异常值",
+      "理解数据标准化的重要性"
+    ],
+    steps: [
+      {
+        title: "步骤1：加载数据并探索结构",
+        goal: "读取CSV文件，了解数据的基本信息和缺失情况",
+        description: "首先导入pandas，读取零售订单数据，查看前几行和数据信息，为后续清洗做准备。",
+        instructions: [
+          "1. 使用pd.read_csv()加载retail_orders.csv",
+          "2. 用head()查看前5行数据",
+          "3. 用info()查看每列的数据类型和非空数量",
+          "4. 用isnull().sum()统计每列缺失值"
+        ],
+        code: "import pandas as pd\n\n# TODO: 读取retail_orders.csv文件\ndf = \n\n# TODO: 查看前5行\nprint('=== 数据预览 ===')\n\n# TODO: 查看数据基本信息\nprint('\\n=== 数据类型 ===')\n\n# TODO: 统计每列缺失值\nprint('\\n=== 缺失值统计 ===')\n",
+        expectedOutput: "显示5行零售订单数据，包含订单ID、产品、价格、数量、日期等列，以及缺失值统计。",
+        feedback: "完美！你已经了解了数据结构。接下来处理缺失值。"
+      },
+      {
+        title: "步骤2：处理缺失值",
+        goal: "根据每列特点选择合适的填充策略",
+        description: "数值列用均值填充，分类列用众数填充，确保数据完整性。",
+        instructions: [
+          "1. 用均值填充price列的缺失值",
+          "2. 用众数填充category列的缺失值",
+          "3. 用ffill填充order_date列的缺失值",
+          "4. 再次检查缺失值是否已全部处理"
+        ],
+        code: "# TODO: 用均值填充price列\ndf['price'] = \n\n# TODO: 用众数填充category列\ndf['category'] = \n\n# TODO: 用前一个值填充order_date列\ndf['order_date'] = \n\n# 检查是否还有缺失值\nprint('缺失值处理后：')\nprint(df.isnull().sum())",
+        expectedOutput: "所有列的缺失值数量都为0。",
+        feedback: "太好了！缺失值已处理完毕。接下来删除重复数据。"
+      },
+      {
+        title: "步骤3：删除重复数据",
+        goal: "识别并删除重复的订单记录",
+        description: "检查重复行，根据订单ID删除重复记录，保留最新的一条。",
+        instructions: [
+          "1. 检查有多少重复行",
+          "2. 根据order_id列删除重复，保留最后一行",
+          "3. 输出删除后的行数"
+        ],
+        code: "# TODO: 检查重复行数量\nprint('重复行数：', )\n\n# TODO: 根据order_id删除重复，保留最后一行\ndf = \n\nprint('去重后数据行数：', len(df))",
+        expectedOutput: "显示重复行数，去重后的数据行数比原来少。",
+        feedback: "做得好！重复数据已清除。现在转换数据类型。"
+      },
+      {
+        title: "步骤4：转换数据类型",
+        goal: "确保每列使用正确的数据类型",
+        description: "将price转为数值，order_date转为日期类型，quantity转为整数。",
+        instructions: [
+          "1. 用pd.to_numeric转换price列",
+          "2. 用pd.to_datetime转换order_date列",
+          "3. 用astype转换quantity为整数",
+          "4. 查看最终的数据类型"
+        ],
+        code: "# TODO: 转换price为数值类型（errors='coerce'）\ndf['price'] = \n\n# TODO: 转换order_date为日期类型\ndf['order_date'] = \n\n# TODO: 转换quantity为整数\ndf['quantity'] = \n\nprint('\\n=== 最终数据类型 ===')\nprint(df.info())",
+        expectedOutput: "price是float64，order_date是datetime64，quantity是int64。",
+        feedback: "完美！数据类型都正确了。接下来处理异常值。"
+      },
+      {
+        title: "步骤5：处理价格异常值",
+        goal: "识别并处理价格列的异常值",
+        description: "用IQR方法找出价格异常值，用边界值替换，避免极端值影响后续分析。",
+        instructions: [
+          "1. 计算Q1、Q3和IQR",
+          "2. 确定上下边界",
+          "3. 用clip方法替换异常值",
+          "4. 查看处理后的价格统计"
+        ],
+        code: "# TODO: 计算Q1、Q3、IQR\nQ1 = \nQ3 = \nIQR = \n\nlower_bound = Q1 - 1.5 * IQR\nupper_bound = Q3 + 1.5 * IQR\n\n# TODO: 用边界值替换异常值\ndf['price'] = \n\nprint('处理后价格统计：')\nprint(df['price'].describe())",
+        expectedOutput: "显示price列的统计信息，最小值和最大值在合理范围内。",
+        feedback: "太棒了！异常值处理完成。最后进行数据标准化。"
+      },
+      {
+        title: "步骤6：数据标准化与保存",
+        goal: "统一字符串格式，保存清洗后的数据",
+        description: "统一分类名称格式，去除产品名称空格，最后保存清洗后的数据。",
+        instructions: [
+          "1. 去除product_name的首尾空格",
+          "2. 将category统一为小写",
+          "3. 保存清洗后的数据为cleaned_orders.csv",
+          "4. 输出最终数据预览"
+        ],
+        code: "# TODO: 去除产品名称首尾空格\ndf['product_name'] = \n\n# TODO: 将分类统一为小写\ndf['category'] = \n\n# 保存清洗后的数据\ndf.to_csv('cleaned_orders.csv', index=False)\n\nprint('\\n=== 清洗后数据预览 ===')\nprint(df.head())\nprint('\\n数据清洗完成！')",
+        expectedOutput: "显示清洗后的5行数据，格式整齐。",
+        feedback: "恭喜！你完成了完整的数据清洗流程！"
+      }
+    ],
+    tips: [
+      "处理缺失值前先了解业务含义，不要盲目填充",
+      "保留原始数据副本，清洗出错可以回退",
+      "多次检查每一步的结果",
+      "日期格式转换要注意原数据格式"
+    ],
+    referenceCode: "import pandas as pd\n\n# 步骤1：加载数据\ndf = pd.read_csv('retail_orders.csv')\nprint('=== 数据预览 ===')\nprint(df.head())\nprint('\\n=== 数据类型 ===')\nprint(df.info())\nprint('\\n=== 缺失值统计 ===')\nprint(df.isnull().sum())\n\n# 步骤2：处理缺失值\ndf['price'] = df['price'].fillna(df['price'].mean())\ndf['category'] = df['category'].fillna(df['category'].mode()[0])\ndf['order_date'] = df['order_date'].fillna(method='ffill')\n\n# 步骤3：删除重复\ndf = df.drop_duplicates(subset=['order_id'], keep='last')\n\n# 步骤4：类型转换\ndf['price'] = pd.to_numeric(df['price'], errors='coerce')\ndf['order_date'] = pd.to_datetime(df['order_date'])\ndf['quantity'] = df['quantity'].astype(int)\n\n# 步骤5：异常值处理\nQ1 = df['price'].quantile(0.25)\nQ3 = df['price'].quantile(0.75)\nIQR = Q3 - Q1\ndf['price'] = df['price'].clip(lower=Q1-1.5*IQR, upper=Q3+1.5*IQR)\n\n# 步骤6：标准化并保存\ndf['product_name'] = df['product_name'].str.strip()\ndf['category'] = df['category'].str.lower()\ndf.to_csv('cleaned_orders.csv', index=False)",
+    feedback: "项目完成！你已掌握完整的数据预处理流程！"
+  },
+  test: [
+    { id: 1, type: "choice", question: "统计每列缺失值数量的正确方法是？", options: ["df.isnull()", "df.isnull().sum()", "df.count()", "df.missing()"], correctAnswer: "B", explanation: "isnull()返回布尔DataFrame，sum()统计每列True的数量，即缺失值个数。对应学习模块的知识点1。" },
+    { id: 2, type: "choice", question: "删除重复行时保留最后一行的参数是？", options: ["keep='first'", "keep='last'", "keep=False", "drop='last'"], correctAnswer: "B", explanation: "keep='last'保留最后一次出现的行。对应学习模块的知识点2。" },
+    { id: 3, type: "choice", question: "将字符串转换为日期类型用什么方法？", options: ["astype('date')", "pd.to_datetime()", "pd.date_convert()", "to_date()"], correctAnswer: "B", explanation: "pd.to_datetime()是转换日期的标准方法。对应学习模块的知识点3。" },
+    { id: 4, type: "truefalse", question: "IQR方法中，异常值是大于Q3+1.5*IQR或小于Q1-1.5*IQR的值。", correctAnswer: "正确", explanation: "这是IQR异常值检测的标准定义。对应学习模块的知识点4。" },
+    { id: 5, type: "fill", question: "去除字符串首尾空格的方法是str.____()。", correctAnswer: "strip", explanation: "str.strip()去除字符串首尾的空格和换行符。对应学习模块的知识点5。" }
+  ]
+};
+
+const project2Details: ProjectDetail = {
+  learning: [
+    {
+      title: "描述性统计基础",
+      content: "describe()快速了解数值列的统计量：count非空数、mean均值、std标准差、min最小值、25%/50%/75%分位数、max最大值。value_counts()看分类值分布。",
+      codeExample: "# 数值列统计\nprint(df.describe())\n\n# 分类列分布\nprint(df['genre'].value_counts())\nprint(df['genre'].value_counts(normalize=True))  # 百分比",
+      quiz: [
+        { 
+          question: "describe()方法不包含哪个统计量？", 
+          options: ["均值", "中位数", "众数", "标准差"], 
+          answer: "C", 
+          explanation: "describe()包含count/mean/std/min/25%/50%/75%/max，不包含众数。" 
+        }
+      ]
+    },
+    {
+      title: "分组聚合分析",
+      content: "groupby()按列分组后配合聚合函数分析。常用聚合：mean()均值、sum()求和、count()计数、median()中位数、min()/max()最值。可以同时对多列用不同聚合。",
+      codeExample: "# 按流派分组，统计平均评分\nprint(df.groupby('genre')['rating'].mean())\n\n# 同时进行多种聚合\nprint(df.groupby('genre').agg({\n    'rating': ['mean', 'count'],\n    'year': ['min', 'max']\n}))",
+      quiz: [
+        { 
+          question: "groupby后获取每组数量用什么方法？", 
+          answer: "count()", 
+          explanation: "count()统计每组的非空值数量，size()统计每组行数。" 
+        }
+      ]
+    },
+    {
+      title: "相关性分析",
+      content: "corr()计算列之间的皮尔逊相关系数：-1完全负相关，0不相关，1完全正相关。abs()>0.7强相关，0.3-0.7中等相关，<0.3弱相关。",
+      codeExample: "# 计算所有数值列的相关矩阵\ncorr_matrix = df.corr()\nprint(corr_matrix)\n\n# 查看两列的相关性\nprint(df['budget'].corr(df['revenue']))",
+      quiz: [
+        { 
+          question: "相关系数绝对值大于多少算强相关？", 
+          options: ["0.3", "0.5", "0.7", "0.9"], 
+          answer: "C", 
+          explanation: "通常|r|>0.7认为是强相关，0.3-0.7中等相关。" 
+        }
+      ]
+    },
+    {
+      title: "交叉表与透视表",
+      content: "crosstab()计算两列的频数交叉表，pivot_table()创建数据透视表，可指定index行、columns列、values值、aggfunc聚合函数。",
+      codeExample: "# 交叉表：流派vs年份的电影数量\nprint(pd.crosstab(df['genre'], df['year']))\n\n# 透视表：按流派和年份，统计平均评分\nprint(df.pivot_table(\n    values='rating',\n    index='genre',\n    columns='year',\n    aggfunc='mean'\n))",
+      quiz: [
+        { 
+          question: "创建数据透视表用什么方法？", 
+          answer: "pivot_table()", 
+          explanation: "pivot_table()是pandas创建透视表的标准方法。" 
+        }
+      ]
+    },
+    {
+      title: "多维度排序",
+      content: "sort_values()按列值排序，by参数指定排序列，可以是单列或多列。ascending控制升序降序，na_position控制缺失值位置。",
+      codeExample: "# 按评分降序，年份升序排序\nprint(df.sort_values(by=['rating', 'year'], ascending=[False, True]).head())\n\n# 按票房排名，选出前10\nprint(df.sort_values('revenue', ascending=False).head(10))",
+      quiz: [
+        { 
+          question: "sort_values中ascending=[False, True]表示？", 
+          options: ["都降序", "都升序", "第一列降序第二列升序", "第一列升序第二列降序"], 
+          answer: "C", 
+          explanation: "ascending列表中的每个元素对应by列表中的每列，False表示降序，True表示升序。" 
+        }
+      ]
+    }
+  ],
+  practice: {
+    intro: "本项目通过电影评分数据进行多维度统计分析，发现数据中的有趣规律。",
+    goals: [
+      "掌握描述性统计方法",
+      "熟练进行分组聚合分析",
+      "理解并计算相关性",
+      "会用交叉表和透视表",
+      "能进行多维度排序"
+    ],
+    steps: [
+      {
+        title: "步骤1：加载数据并做基础统计",
+        goal: "了解数据概况和分布",
+        description: "加载电影数据，查看基本信息和统计量，了解数据分布。",
+        instructions: [
+          "1. 读取movies_ratings.csv",
+          "2. 查看基本信息和前10行",
+          "3. 对数值列做描述性统计",
+          "4. 查看流派的分布情况"
+        ],
+        code: "import pandas as pd\n\n# TODO: 读取电影数据\ndf = \n\nprint('=== 数据预览 ===')\nprint(df.head(10))\nprint('\\n=== 描述性统计 ===')\nprint(df.describe())\n\n# TODO: 查看流派分布\nprint('\\n=== 流派分布 ===')\n",
+        expectedOutput: "显示电影数据的统计量和各流派的电影数量。",
+        feedback: "很好！你已经了解了数据基本情况。接下来进行分组分析。"
+      },
+      {
+        title: "步骤2：按流派分组分析",
+        goal: "比较不同流派的电影特点",
+        description: "按流派分组，统计平均评分、平均票房、电影数量等指标。",
+        instructions: [
+          "1. 按流派分组，计算平均评分",
+          "2. 按流派分组，统计电影数量",
+          "3. 按流派分组，计算平均票房",
+          "4. 用agg同时计算多个指标"
+        ],
+        code: "# TODO: 按流派分组，计算平均评分\nprint('=== 各流派平均评分 ===')\n\n# TODO: 按流派分组，统计电影数量\nprint('\\n=== 各流派电影数量 ===')\n\n# TODO: 用agg同时计算多个指标\nprint('\\n=== 多指标聚合 ===')\nprint(df.groupby('genre').agg({\n    'rating': ['mean', 'count'],\n    'revenue': 'mean',\n    'year': 'min'\n}))",
+        expectedOutput: "显示各流派的平均评分、电影数量、平均票房等信息。",
+        feedback: "太棒了！分组分析完成。接下来计算相关性。"
+      },
+      {
+        title: "步骤3：相关性分析",
+        goal: "发现变量之间的关系",
+        description: "计算相关矩阵，重点看预算和票房、评分和票房的相关性。",
+        instructions: [
+          "1. 计算所有数值列的相关矩阵",
+          "2. 特别查看budget和revenue的相关性",
+          "3. 查看rating和revenue的相关性",
+          "4. 分析发现的规律"
+        ],
+        code: "# TODO: 计算相关矩阵\nprint('=== 相关矩阵 ===')\n\n# TODO: 查看预算和票房的相关性\nprint('\\n预算与票房的相关系数：')\n\n# TODO: 查看评分与票房的相关性\nprint('评分与票房的相关系数：')\n",
+        expectedOutput: "显示相关矩阵，预算和票房通常正相关，评分和票房弱相关。",
+        feedback: "很好！相关性分析完成。接下来用透视表深入分析。"
+      },
+      {
+        title: "步骤4：创建数据透视表",
+        goal: "多维度交叉分析",
+        description: "创建透视表，看不同年代不同流派的电影数量和平均评分。",
+        instructions: [
+          "1. 先创建年代列（每10年一段）",
+          "2. 用crosstab看流派vs年代的电影数量",
+          "3. 用pivot_table看流派vs年代的平均评分",
+          "4. 观察有趣的发现"
+        ],
+        code: "# 创建年代列\ndf['decade'] = (df['year'] // 10) * 10\n\n# TODO: 交叉表：流派vs年代\nprint('=== 流派vs年代电影数量 ===')\n\n# TODO: 透视表：流派vs年代的平均评分\nprint('\\n=== 流派vs年代平均评分 ===')\n",
+        expectedOutput: "显示各年代各流派的电影数量和平均评分。",
+        feedback: "完美！透视表创建成功。最后进行排名分析。"
+      },
+      {
+        title: "步骤5：排序与筛选分析",
+        goal: "找出Top N和趋势",
+        description: "按票房排序找出Top 10电影，按评分找出高分电影，分析近年趋势。",
+        instructions: [
+          "1. 按票房降序，显示Top 10",
+          "2. 按评分降序，显示Top 20",
+          "3. 筛选2010年后的高分电影",
+          "4. 分析近年评分趋势"
+        ],
+        code: "# TODO: 票房Top 10\nprint('=== 票房Top 10 ===')\n\n# TODO: 评分Top 20\nprint('\\n=== 评分Top 20 ===')\n\n# TODO: 2010年后评分>8的电影\nprint('\\n=== 2010年后高分电影 ===')\nrecent_high = df[(df['year'] >= 2010) & (df['rating'] > 8)]\nprint(recent_high[['title', 'year', 'rating', 'genre']].head())",
+        expectedOutput: "显示票房和评分最高的电影，以及近年高分电影。",
+        feedback: "精彩！你完成了全面的统计分析！"
+      }
+    ],
+    tips: [
+      "相关性不等于因果关系，只表示关联",
+      "分组前先看分组列的分布是否均衡",
+      "多维度排序时注意优先级顺序",
+      "透视表有助于发现隐藏的模式"
+    ],
+    referenceCode: "import pandas as pd\n\ndf = pd.read_csv('movies_ratings.csv')\nprint(df.describe())\nprint(df['genre'].value_counts())\n\n# 分组分析\nprint(df.groupby('genre')['rating'].mean())\nprint(df.groupby('genre').agg({\n    'rating': ['mean', 'count'],\n    'revenue': 'mean'\n}))\n\n# 相关性\nprint(df.corr())\nprint(df['budget'].corr(df['revenue']))\n\n# 透视表\ndf['decade'] = (df['year'] // 10) * 10\nprint(pd.crosstab(df['genre'], df['decade']))\nprint(df.pivot_table('rating', 'genre', 'decade', 'mean'))\n\n# 排序\nprint(df.sort_values('revenue', ascending=False).head(10))\nprint(df.sort_values('rating', ascending=False).head(20))",
+    feedback: "项目完成！你已掌握多维统计分析！"
+  },
+  test: [
+    { id: 1, type: "choice", question: "describe()方法不包含以下哪个统计量？", options: ["均值", "中位数", "众数", "标准差"], correctAnswer: "C", explanation: "describe()包含count/mean/std/min/25%/50%/75%/max，50%就是中位数，但不计算众数。对应学习模块的知识点1。" },
+    { id: 2, type: "choice", question: "groupby后统计每组行数用什么？", options: ["count()", "size()", "sum()", "length()"], correctAnswer: "B", explanation: "size()统计每组的行数，count()统计每组的非空值数量。对应学习模块的知识点2。" },
+    { id: 3, type: "choice", question: "皮尔逊相关系数的取值范围是？", options: ["[0, 1]", "[-1, 1]", "[0, ∞)", "[-∞, ∞]"], correctAnswer: "B", explanation: "相关系数r的范围是-1到1，-1完全负相关，1完全正相关，0不相关。对应学习模块的知识点3。" },
+    { id: 4, type: "truefalse", question: "pivot_table()方法用于创建数据透视表。", correctAnswer: "正确", explanation: "pivot_table()是pandas创建透视表的标准方法，可指定index、columns、values、aggfunc。对应学习模块的知识点4。" },
+    { id: 5, type: "fill", question: "sort_values中控制升序降序的参数是____。", correctAnswer: "ascending", explanation: "ascending=True升序（默认），ascending=False降序。对应学习模块的知识点5。" }
+  ]
 };
 
 export const projectDetails: Record<number, ProjectDetail> = {
-  1: {
-    learning: [
-      {
-        title: "缺失值处理",
-        content: "在实际数据中，缺失值是常见的问题。Pandas提供了多种检测和处理缺失值的方法。",
-        codeExample: "import pandas as pd\nimport numpy as np\n\n# 检测和填充缺失值\nprint(df.isnull().sum())\ndf = df.fillna(df.mean())",
-        quiz: [
-          { question: "检测缺失值的方法是？", options: ["isnull()", "check()", "missing()", "find()"], answer: "A", explanation: "isnull()方法用于检测缺失值，返回布尔值。" }
-        ]
-      }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "检查DataFrame中缺失值数量的方法是？", options: ["df.count()", "df.isnull().sum()", "df.checknull()", "df.missing()"], correctAnswer: "B", explanation: "isnull().sum()会对每一列的缺失值进行计数。" },
-      { id: 2, type: "choice", question: "用均值填充数值列缺失值的正确方法是？", options: ["df.fillna(df.mean())", "df.fillna(mean)", "df.mean().fillna()", "fillna(df.mean())"], correctAnswer: "A", explanation: "用df.mean()计算均值，作为fillna()的参数。" },
-      { id: 3, type: "choice", question: "删除含有缺失值的行，应该使用？", options: ["df.drop()", "df.dropna()", "df.remove()", "df.delete()"], correctAnswer: "B", explanation: "dropna()方法用于删除含有缺失值的行或列。" },
-      { id: 4, type: "truefalse", question: "fillna(0)会用0填充所有缺失值。", correctAnswer: "正确", explanation: "fillna()会根据传入的参数填充所有的缺失值。" },
-      { id: 5, type: "fill", question: "用前一个非空值填充，使用____方法。", correctAnswer: "ffill", explanation: "ffill（forward fill）使用前一个非空值填充后面的缺失值。" }
-    ]
-  },
-  2: {
-    learning: [
-      { title: "数据筛选", content: "根据条件筛选数据是数据分析中最常用的操作之一。", quiz: [{ question: "筛选的基本语法？", answer: "df[condition]", explanation: "用方括号加布尔表达式筛选数据。" }] }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "筛选年龄大于30的人，正确代码是？", options: ["df['age'] > 30", "df[df['age'] > 30]", "df.age > 30", "df.where(age > 30)"], correctAnswer: "B", explanation: "需要把布尔表达式放在外层方括号内。" },
-      { id: 2, type: "choice", question: "多条件筛选时应该用什么逻辑运算符？", options: ["and / or", "& / |", "&& / ||", "+, -"], correctAnswer: "B", explanation: "Pandas筛选使用位运算符 & 或 |。" },
-      { id: 3, type: "choice", question: "按列筛选，只保留'name'和'age'列，代码是？", options: ["df['name', 'age']", "df[['name', 'age']]", "df(name, age)", "df.select(['name', 'age'])"], correctAnswer: "B", explanation: "选择多列需要双重方括号。" },
-      { id: 4, type: "truefalse", question: "df.head()默认显示前5行数据。", correctAnswer: "正确", explanation: "head()方法默认显示前5行，也可以传入参数指定行数。" },
-      { id: 5, type: "fill", question: "按条件赋值时，推荐使用____方法。", correctAnswer: "loc", explanation: "使用 .loc[indexer, column] 进行条件赋值更安全。" }
-    ]
-  },
-  3: {
-    learning: [
-      { title: "关联规则基础", content: "Apriori算法是最常用的关联规则挖掘算法。", quiz: [{ question: "支持度是什么？", answer: "频率", explanation: "支持度表示项目集出现的频率。" }] }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "Apriori算法的核心思想是？", options: ["随机搜索", "逐层迭代+剪枝", "深度优先", "贪心算法"], correctAnswer: "B", explanation: "Apriori逐层查找频繁项集，同时剪枝掉不满足条件的项集。" },
-      { id: 2, type: "choice", question: "规则 {牛奶} → {面包} 的置信度是？", options: ["P(牛奶)", "P(面包)", "P(牛奶|面包)", "P(面包|牛奶)"], correctAnswer: "D", explanation: "置信度是条件概率，表示买了牛奶后也买面包的概率。" },
-      { id: 3, type: "choice", question: "提升度大于1表示什么？", options: ["负相关", "无相关", "正相关", "完美相关"], correctAnswer: "C", explanation: "提升度>1表示两者是正相关关系，规则有价值。" },
-      { id: 4, type: "truefalse", question: "最小支持度设置得越高，找到的频繁项集越多。", correctAnswer: "错误", explanation: "最小支持度越高，要求越严格，找到的频繁项集越少。" },
-      { id: 5, type: "fill", question: "关联规则常用的两个指标是____和置信度。", correctAnswer: "支持度", explanation: "支持度和置信度是关联规则最基本的评价指标。" }
-    ]
-  },
-  4: {
-    learning: [
-      { title: "K-Means聚类", content: "K-Means是无监督学习算法，将数据分成K个簇。", quiz: [{ question: "K表示？", answer: "簇数", explanation: "K表示聚类的簇数量。" }] }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "K-Means的第一步是？", options: ["分配点到簇", "更新簇中心", "随机选K个初始中心点", "计算距离"], correctAnswer: "C", explanation: "首先随机选择K个点作为初始簇中心点。" },
-      { id: 2, type: "choice", question: "常用的距离度量是？", options: ["余弦距离", "欧氏距离", "曼哈顿距离", "Jaccard距离"], correctAnswer: "B", explanation: "K-Means通常使用欧氏距离。" },
-      { id: 3, type: "choice", question: "如何选择合适的K值？", options: ["随机选", "肘方法（Elbow Method）", "交叉验证", "K越大越好"], correctAnswer: "B", explanation: "肘方法通过看K值-误差曲线找到拐点。" },
-      { id: 4, type: "truefalse", question: "K-Means的结果不会受初始中心点的影响。", correctAnswer: "错误", explanation: "初始中心点的选择会影响聚类结果，通常需要多次运行。" },
-      { id: 5, type: "fill", question: "聚类结果评估的常用指标是____。", correctAnswer: "轮廓系数", explanation: "轮廓系数综合考虑了簇内凝聚力和簇间分离度。" }
-    ]
-  },
-  5: {
-    learning: [
-      { title: "RFM用户分层", content: "RFM是衡量客户价值的模型。", quiz: [{ question: "R代表什么？", answer: "Recency", explanation: "R表示最近一次消费。" }] }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "RFM模型中的F是指？", options: ["Frequency", "Feature", "Final", "First"], correctAnswer: "A", explanation: "F是Frequency，表示消费频率。" },
-      { id: 2, type: "choice", question: "RFM通常将用户分成几组？", options: ["5组", "8组", "11组", "3组"], correctAnswer: "B", explanation: "传统RFM将每个维度分成5份，2^3=8组或5^3=125组。" },
-      { id: 3, type: "choice", question: "给RFM打分时，R值越小应该？", options: ["分数越低", "分数越高", "分数不变", "不确定"], correctAnswer: "B", explanation: "R值小意味着最近购买过，通常更有价值，分数更高。" },
-      { id: 4, type: "truefalse", question: "M（Monetary）表示消费金额。", correctAnswer: "正确", explanation: "M表示消费金额或消费贡献。" },
-      { id: 5, type: "fill", question: "RFM中，最重要的客户群体通常叫____。", correctAnswer: "重要价值客户", explanation: "重要价值客户是RFM都高的客户。" }
-    ]
-  },
-  6: {
-    learning: [
-      { title: "线性回归基础", content: "线性回归是最基础的监督学习算法。", quiz: [{ question: "目标是？", answer: "预测连续值", explanation: "线性回归用于预测连续数值。" }] }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "线性回归找的是？", options: ["最大值", "最小平方误差的直线", "中位数", "最多数的点"], correctAnswer: "B", explanation: "线性回归目标是找到使平方误差最小的直线。" },
-      { id: 2, type: "choice", question: "回归模型评估指标是？", options: ["Accuracy", "R²", "Precision", "F1"], correctAnswer: "B", explanation: "R²是回归模型最常用的评估指标。" },
-      { id: 3, type: "choice", question: "R²的取值范围是？", options: ["[0,1]", "[-1,1]", "[0, +∞)", "[-∞,+∞]"], correctAnswer: "A", explanation: "R²的范围通常是0到1，值越接近1越好。" },
-      { id: 4, type: "truefalse", question: "线性回归可以处理非线性关系。", correctAnswer: "错误", explanation: "线性回归假设变量是线性关系，不能直接处理非线性关系。" },
-      { id: 5, type: "fill", question: "用sklearn训练线性回归的类是____。", correctAnswer: "LinearRegression", explanation: "from sklearn.linear_model import LinearRegression" }
-    ]
-  },
-  7: {
-    learning: [
-      { title: "随机森林", content: "随机森林是集成学习方法，准确率高且稳定。", quiz: [{ question: "集成方法基于？", answer: "决策树", explanation: "随机森林由多棵决策树组成。" }] }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "随机森林是哪种集成方法？", options: ["Bagging", "Boosting", "Stacking", "Voting"], correctAnswer: "A", explanation: "随机森林是Bagging的一种变体。" },
-      { id: 2, type: "choice", question: "随机森林的特点是？", options: ["易过拟合", "对噪声鲁棒", "非常快", "只能用做分类"], correctAnswer: "B", explanation: "随机森林对噪声比较鲁棒，不容易过拟合。" },
-      { id: 3, type: "choice", question: "特征重要性是指？", options: ["特征数值大小", "特征对预测的贡献", "特征名称长度", "特征顺序"], correctAnswer: "B", explanation: "特征重要性表示每个特征对预测的贡献程度。" },
-      { id: 4, type: "truefalse", question: "随机森林可以处理分类和回归两种任务。", correctAnswer: "正确", explanation: "随机森林有RandomForestClassifier和RandomForestRegressor。" },
-      { id: 5, type: "fill", question: "随机森林中增加树的数量，模型性能通常会____。", correctAnswer: "提升", explanation: "在一定范围内，树的数量越多，性能越稳定。" }
-    ]
-  },
-  8: {
-    learning: [
-      { title: "时间序列分析", content: "时间序列数据按时间顺序排列，有其特殊性。", quiz: [{ question: "主要特点是？", answer: "时间依赖性", explanation: "时间序列存在时间依赖性和趋势。" }] }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "时间序列数据应该怎么排序？", options: ["随机排序", "按时间顺序", "按数值大小", "按字母顺序"], correctAnswer: "B", explanation: "时间序列必须按时间先后顺序排列。" },
-      { id: 2, type: "choice", question: "时间序列预测的经典方法是？", options: ["K-Means", "ARIMA", "SVM", "Decision Tree"], correctAnswer: "B", explanation: "ARIMA是经典的时间序列预测方法。" },
-      { id: 3, type: "choice", question: "平稳性是指？", options: ["数据不变", "均值和方差稳定", "递增趋势", "递减趋势"], correctAnswer: "B", explanation: "平稳性指均值和方差在时间上保持稳定。" },
-      { id: 4, type: "truefalse", question: "可以用机器学习模型直接预测时间序列。", correctAnswer: "正确", explanation: "可以构造特征用LSTM、XGBoost等模型预测。" },
-      { id: 5, type: "fill", question: "把时间序列分解为趋势、季节和____。", correctAnswer: "残差", explanation: "经典分解法把序列分解为趋势、季节和随机部分。" }
-    ]
-  },
-  9: {
-    learning: [
-      { title: "异常检测", content: "找出数据中不正常的点，有重要应用价值。", quiz: [{ question: "常用方法？", answer: "IQR方法", explanation: "用四分位距检测异常值。" }] }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "用IQR方法，异常值定义为？", options: ["Q1-1.5*IQR 以下", "Q3+1.5*IQR 以上", "A 或 B", "都不是"], correctAnswer: "C", explanation: "IQR方法认为超出Q1-1.5IQR和Q3+1.5IQR的是异常值。" },
-      { id: 2, type: "choice", question: "Z-score方法中，通常认为z>____是异常值。", options: ["1", "2", "3", "4"], correctAnswer: "C", explanation: "通常Z-score绝对值大于3被认为是异常值。" },
-      { id: 3, type: "choice", question: "Isolation Forest适合？", options: ["低维数据", "高维数据", "仅分类数据", "仅数值数据"], correctAnswer: "B", explanation: "Isolation Forest特别适合高维数据。" },
-      { id: 4, type: "truefalse", question: "异常值都应该被删除。", correctAnswer: "错误", explanation: "异常值未必需要删除，需要根据业务决定。" },
-      { id: 5, type: "fill", question: "四分位距IQR = Q3 - ____。", correctAnswer: "Q1", explanation: "IQR是上四分位数减下四分位数。" }
-    ]
-  },
-  10: {
-    learning: [
-      { title: "综合项目流程", content: "完整的数据科学项目流程：理解问题→EDA→建模→评估→上线。", quiz: [{ question: "第一步？", answer: "理解业务", explanation: "理解业务问题是最重要的第一步。" }] }
-    ],
-    practice: defaultPractice,
-    test: [
-      { id: 1, type: "choice", question: "完整的数据科学项目第一步是？", options: ["写代码", "理解业务问题", "收集数据", "建模"], correctAnswer: "B", explanation: "理解业务问题是最重要的第一步。" },
-      { id: 2, type: "choice", question: "EDA指的是？", options: ["数据清理", "探索性数据分析", "模型训练", "模型评估"], correctAnswer: "B", explanation: "EDA是Exploratory Data Analysis。" },
-      { id: 3, type: "choice", question: "模型评估时最重要的是？", options: ["训练集准确率", "测试集指标", "速度", "代码简洁"], correctAnswer: "B", explanation: "泛化性能最重要，要看测试集表现。" },
-      { id: 4, type: "truefalse", question: "特征工程是提升模型性能的关键环节。", correctAnswer: "正确", explanation: "特征工程常常比模型选择更能影响性能。" },
-      { id: 5, type: "fill", question: "机器学习项目中，通常数据处理耗时占____以上。", correctAnswer: "70%", explanation: "业界经验显示，数据处理通常耗时占整个项目的70%以上。" }
-    ]
-  }
+  1: project1Details,
+  2: project2Details,
+  3: project2Details,
+  4: project2Details,
+  5: project2Details,
+  6: project2Details,
+  7: project2Details,
+  8: project2Details,
+  9: project2Details,
+  10: project2Details
 };
