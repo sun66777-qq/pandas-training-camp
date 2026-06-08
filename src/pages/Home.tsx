@@ -7,6 +7,7 @@ import { FeaturedProject } from "../components/FeaturedProject";
 import { ProjectList } from "../components/ProjectList";
 import { DataDashboard } from "../components/DataDashboard";
 import { HotProjects } from "../components/HotProjects";
+import { StudentReviews } from "../components/StudentReviews";
 
 export default function Home() {
   return (
@@ -77,6 +78,9 @@ export default function Home() {
 
         {/* 新设计的学习路线图放在底部 */}
         <LearningPath />
+
+        {/* 新增学员评价板块 */}
+        <StudentReviews />
       </main>
 
       {/* Footer */}
