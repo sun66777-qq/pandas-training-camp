@@ -29,20 +29,6 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold gradient-text mb-4">
-                明星实战项目
-              </h2>
-              <p className="text-text-secondary max-w-2xl mx-auto">
-                真实商业场景，数据驱动决策
-              </p>
-            </div>
-            <FeaturedProject />
-          </div>
-        </div>
-
         <div id="projects" className="py-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -70,6 +56,20 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold gradient-text mb-4">
+                明星实战项目
+              </h2>
+              <p className="text-text-secondary max-w-2xl mx-auto">
+                真实商业场景，数据驱动决策
+              </p>
+            </div>
+            <FeaturedProject />
           </div>
         </div>
 
