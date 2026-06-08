@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
-import { Sparkles, Code, Users, CheckCircle, Award, BookOpen } from "lucide-react";
+import { Sparkles, Users, BookOpen, Code, User } from "lucide-react";
 
 export function HeroSection() {
-  const [studentCount, setStudentCount] = useState(0);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const target = 1659;
+    const target = Math.floor(Math.random() * 500) + 1500;
     let current = 0;
     const increment = target / 50;
     const timer = setInterval(() => {
       current += increment;
       if (current >= target) {
-        setStudentCount(target);
+        setCount(target);
         clearInterval(timer);
       } else {
-        setStudentCount(Math.floor(current));
+        setCount(Math.floor(current));
       }
     }, 30);
     return () => clearInterval(timer);
@@ -47,44 +47,48 @@ export function HeroSection() {
 
       <div className="relative z-10 container mx-auto px-4 py-20">
         <div className="flex flex-col md:flex-row gap-10 items-center">
-          {/* Left Content (55%) */}
-          <div className="w-full md:w-[55%] animate-slide-up">
+          {/* Left Content (60%) */}
+          <div className="w-full md:w-3/5 animate-slide-up">
             {/* Main Title */}
-            <div className="mb-6">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4 gradient-text text-left leading-tight">
+            <div className="mb-8">
+              <h1 className="text-5xl md:text-7xl font-bold mb-4 gradient-text text-left">
                 Pandas数据分析
                 <br />
-                实战训练营
+                <span className="text-4xl md:text-6xl">实战训练营</span>
               </h1>
             </div>
 
             {/* Subtitle */}
-            <div className="mb-6" style={{ animationDelay: "0.2s" }}>
-              <p className="text-lg md:text-xl text-text-secondary text-left">
-                从零基础到数据分析高手，10个真实商业项目实战
+            <div className="mb-8" style={{ animationDelay: "0.2s" }}>
+              <p className="text-xl md:text-2xl text-text-secondary text-left">
+                🚀 从零基础到数据分析高手，10个真实商业项目实战
               </p>
             </div>
 
-            {/* Student Introduction */}
+            {/* Dynamic Counter */}
             <div className="mb-8" style={{ animationDelay: "0.4s" }}>
-              <div className="glass-card rounded-2xl p-5 text-left">
-                <p className="text-text-primary text-base leading-relaxed">
-                  大家好！我是来自广东科学技术职业学院商务数据分析与应用专业的学生，欢迎和我一起学习Pandas数据分析！
-                </p>
+              <div className="inline-flex items-center gap-3 glass-card rounded-full px-8 py-4">
+                <Users className="w-6 h-6 text-neon-cyan" />
+                <span className="text-text-primary font-semibold">
+                  已帮助
+                  <span className="text-neon-cyan ml-2 text-2xl font-bold">
+                    {count.toLocaleString()}
+                  </span>
+                  名学生完成项目
+                </span>
+                <Sparkles className="w-5 h-5 text-neon-purple animate-pulse" />
               </div>
             </div>
 
-            {/* Skills Tags */}
-            <div className="mb-8" style={{ animationDelay: "0.6s" }}>
-              <div className="flex flex-wrap gap-3">
-                {["Python", "Pandas", "SQL", "机器学习"].map((skill, idx) => (
-                  <span
-                    key={idx}
-                    className="px-4 py-2 rounded-full text-sm font-medium bg-dark-card-hover border border-neon-cyan/30 text-text-primary hover:border-neon-cyan/60 transition-colors"
-                  >
-                    {skill}
-                  </span>
-                ))}
+            {/* Student Introduction */}
+            <div className="mb-10" style={{ animationDelay: "0.6s" }}>
+              <div className="glass-card rounded-2xl p-6 text-left">
+                <p className="text-text-primary text-base md:text-lg leading-relaxed mb-4">
+                  大家好！我是来自广东科学技术职业学院商务数据分析与应用专业的学生，欢迎和我一起学习 Pandas 数据分析！👋
+                </p>
+                <p className="text-text-secondary text-base">
+                  这门课程将带你从真实的商业数据集出发，通过10个实战项目，系统掌握Pandas数据分析技能！
+                </p>
               </div>
             </div>
 
@@ -92,7 +96,7 @@ export function HeroSection() {
             <div style={{ animationDelay: "0.8s" }}>
               <button
                 onClick={() => scrollToSection("features")}
-                className="glow-button inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-bg font-bold text-lg rounded-xl hover:scale-105 transition-transform animate-glow-pulse"
+                className="glow-button inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-bg font-bold text-lg rounded-xl hover:scale-105 transition-transform animate-glow-pulse"
               >
                 <Code className="w-6 h-6" />
                 开始你的数据分析之旅
@@ -101,78 +105,65 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right Stats Card (40%) */}
-          <div className="w-full md:w-[40%] animate-slide-up" style={{ animationDelay: "0.5s" }}>
-            <div className="glass-card rounded-2xl p-6 border border-dark-border hover:border-neon-cyan/30 transition-all duration-300">
-              {/* Stats Header */}
-              <div className="text-center mb-6 pb-4 border-b border-dark-border">
-                <h3 className="text-xl font-bold text-text-primary">训练营数据看板</h3>
-                <p className="text-sm text-text-secondary mt-1">实时更新中</p>
-              </div>
-
-              {/* Stats Grid 2x2 */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* 已报名学员 */}
-                <div className="glass-card-hover rounded-xl p-4 text-center group">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Users className="w-5 h-5 text-neon-cyan" />
-                    <span className="text-sm text-text-secondary">已报名学员</span>
-                  </div>
-                  <div className="text-2xl font-bold text-neon-cyan">
-                    {studentCount.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-text-muted">人</div>
-                </div>
-
-                {/* 项目完成 */}
-                <div className="glass-card-hover rounded-xl p-4 text-center group">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <CheckCircle className="w-5 h-5 text-neon-cyan" />
-                    <span className="text-sm text-text-secondary">项目完成</span>
-                  </div>
-                  <div className="text-2xl font-bold text-neon-cyan">
-                    5,000+
-                  </div>
-                  <div className="text-xs text-text-muted">次</div>
-                </div>
-
-                {/* 获得徽章 */}
-                <div className="glass-card-hover rounded-xl p-4 text-center group">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Award className="w-5 h-5 text-neon-cyan" />
-                    <span className="text-sm text-text-secondary">获得徽章</span>
-                  </div>
-                  <div className="text-2xl font-bold text-neon-cyan">
-                    500+
-                  </div>
-                  <div className="text-xs text-text-muted">个</div>
-                </div>
-
-                {/* 实战项目 */}
-                <div className="glass-card-hover rounded-xl p-4 text-center group">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <BookOpen className="w-5 h-5 text-neon-cyan" />
-                    <span className="text-sm text-text-secondary">实战项目</span>
-                  </div>
-                  <div className="text-2xl font-bold text-neon-cyan">
-                    10
-                  </div>
-                  <div className="text-xs text-text-muted">个</div>
+          {/* Right Profile Card (35%) */}
+          <div className="w-full md:w-[35%] animate-slide-up" style={{ animationDelay: "0.5s" }}>
+            <div className="glass-card-hover rounded-2xl p-8 text-center border border-dark-border hover:border-neon-cyan/30 transition-all duration-300">
+              {/* Avatar */}
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-neon-cyan to-neon-purple p-1 flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-dark-bg flex items-center justify-center text-5xl">
+                  🐱
                 </div>
               </div>
 
-              {/* Progress Indicator */}
-              <div className="mt-6 pt-4 border-t border-dark-border">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-text-secondary">训练营进度</span>
-                  <span className="text-neon-cyan font-semibold">进行中</span>
+              {/* Name */}
+              <h3 className="text-2xl font-bold text-text-primary mb-2">狸猫</h3>
+
+              {/* Identity */}
+              <p className="text-text-secondary mb-6 text-base">
+                广东科学技术职业学院 · 商务数据分析与应用专业
+              </p>
+
+              {/* Skills Tags */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-text-secondary mb-3 uppercase tracking-wider">技能标签</h4>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {["Python", "Pandas", "数据可视化", "SQL", "机器学习"].map((skill, idx) => (
+                    <span key={idx} className="px-3 py-1 rounded-full text-sm bg-dark-card-hover border border-dark-border text-text-primary">
+                      {skill}
+                    </span>
+                  ))}
                 </div>
-                <div className="mt-2 h-2 bg-dark-card rounded-full overflow-hidden">
-                  <div className="h-full w-3/4 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-full animate-pulse" />
-                </div>
+              </div>
+
+              {/* Intro */}
+              <div className="pt-4 border-t border-dark-border">
+                <p className="text-text-secondary text-sm italic">
+                  "热爱数据分析，正在成为数据科学家的路上"
+                </p>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Stats Grid (keep below) */}
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto animate-slide-up" style={{ animationDelay: "1s" }}>
+          {[
+            { icon: BookOpen, label: "精品课程", value: "10+" },
+            { icon: Users, label: "学习人数", value: "5,000+" },
+            { icon: Sparkles, label: "项目实战", value: "100%" },
+            { icon: Code, label: "代码案例", value: "500+" },
+          ].map((stat, idx) => (
+            <div
+              key={idx}
+              className="glass-card-hover rounded-xl p-6 text-center group"
+            >
+              <stat.icon className="w-8 h-8 text-neon-cyan mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <div className="text-3xl font-bold text-text-primary mb-1">
+                {stat.value}
+              </div>
+              <div className="text-sm text-text-secondary">{stat.label}</div>
+            </div>
+          ))}
         </div>
       </div>
 
