@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock, Database, Check, X, ChevronDown, ChevronUp, BookOpen, Code2, CheckCircle2, AlertCircle } from "lucide-react";
 import { projects } from "../data/projects";
@@ -24,6 +24,7 @@ export default function ProjectDetail() {
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [expandedExplanations, setExpandedExplanations] = useState<Record<number, boolean>>({});
+  const [visibleQuestions, setVisibleQuestions] = useState(3); // 性能优化：初始只显示3道题
 
   const project = projects.find((p) => p.id === Number(id));
   const detail = project ? projectDetails[project.id] : null;
@@ -54,36 +55,56 @@ export default function ProjectDetail() {
     { key: "test", label: "测试", icon: CheckCircle2 },
   ];
 
-  const handleQuizToggle = (pointIndex: number, quizIndex: number) => {
+  // 使用 useCallback 优化事件处理，避免不必要的重渲染
+  const handleQuizToggle = useCallback((pointIndex: number, quizIndex: number) => {
     const key = `${pointIndex}-${quizIndex}`;
     setExpandedQuiz((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  }, []);
 
-  const handleTestAnswer = (questionId: number, answer: string) => {
-    setQuizAnswers((prev) => ({ ...prev, [questionId]: answer }));
-  };
+  const handleTestAnswer = useCallback((questionId: number, answer: string) => {
+    // 性能优化：只在答案变化时才更新状态
+    setQuizAnswers((prev) => {
+      if (prev[questionId] === answer) return prev;
+      return { ...prev, [questionId]: answer };
+    });
+  }, []);
 
-  const calculateScore = () => {
+  // 使用 useMemo 缓存得分计算结果
+  const calculateScore = useMemo(() => {
     let correct = 0;
-    detail.test.forEach((q) => {
+    detail?.test.forEach((q) => {
       if (quizAnswers[q.id] === String(q.correctAnswer)) {
         correct++;
       }
     });
     return Math.round((correct / detail.test.length) * 100);
-  };
+  }, [detail, quizAnswers]);
 
-  const handleSubmitTest = () => {
+  const handleSubmitTest = useCallback(() => {
+    // 性能优化：先计算分数，再更新状态
+    const score = calculateScore;
     setShowResults(true);
-    const score = calculateScore();
     if (score >= 80) {
       updateProjectProgress(project.id, true, score);
     }
-  };
+  }, [calculateScore, project.id, updateProjectProgress]);
 
-  const toggleExplanation = (questionId: number) => {
+  const toggleExplanation = useCallback((questionId: number) => {
     setExpandedExplanations((prev) => ({ ...prev, [questionId]: !prev[questionId] }));
-  };
+  }, []);
+
+  // 加载更多题目
+  const loadMoreQuestions = useCallback(() => {
+    setVisibleQuestions((prev) => Math.min(prev + 2, detail.test.length));
+  }, [detail.test.length]);
+
+  // 重置测试
+  const handleResetTest = useCallback(() => {
+    setShowResults(false);
+    setQuizAnswers({});
+    setExpandedExplanations({});
+    setVisibleQuestions(3); // 重置为只显示3道题
+  }, []);
 
   return (
     <div className="min-h-screen bg-dark-bg">
@@ -295,7 +316,7 @@ export default function ProjectDetail() {
           </div>
         )}
 
-        {/* Test module - 28% / 68% with 4% gap */}
+        {/* Test module - 28% / 68% with 4% gap - 性能优化版本 */}
         {activeTab === "test" && (
           <div className="flex flex-col md:flex-row gap-[4%]">
             {/* Left Panel - 28% */}
@@ -342,7 +363,8 @@ export default function ProjectDetail() {
             <div className="w-full md:w-[68%] md:py-4">
               <div className="glass-card rounded-2xl p-8">
                 <div className="space-y-6 mb-8">
-                  {detail.test.map((q) => (
+                  {/* 性能优化：只渲染可见的题目 */}
+                  {detail.test.slice(0, visibleQuestions).map((q) => (
                     <div key={q.id} className="bg-dark-card-hover rounded-xl p-6">
                       <p className="font-medium text-text-primary mb-5 text-lg leading-relaxed">
                         {q.id}. {q.question}
@@ -369,7 +391,7 @@ export default function ProjectDetail() {
                               key={option}
                               onClick={() => handleTestAnswer(q.id, option)}
                               disabled={showResults}
-                              className={`px-8 py-4 rounded-xl font-medium transition-all border text-base ${
+                              className={`px-8 py-4 rounded-xl font-medium border text-base ${
                                 quizAnswers[q.id] === option
                                   ? "bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50"
                                   : "bg-dark-bg border-dark-border text-text-secondary hover:bg-dark-card-hover"
@@ -399,7 +421,7 @@ export default function ProjectDetail() {
                                 key={optIdx}
                                 onClick={() => handleTestAnswer(q.id, optionLetter)}
                                 disabled={showResults}
-                                className={`w-full p-4 rounded-xl text-left font-medium transition-all ${bgClass}`}
+                                className={`w-full p-4 rounded-xl text-left font-medium border ${bgClass}`}
                               >
                                 <span className="font-bold mr-3">{optionLetter}.</span>
                                 {option}
@@ -415,15 +437,17 @@ export default function ProjectDetail() {
                         </div>
                       )}
 
+                      {/* 性能优化：解析按钮始终显示，但内容延迟加载 */}
                       <button
                         onClick={() => toggleExplanation(q.id)}
-                        className="mt-5 text-base text-neon-cyan hover:text-neon-purple transition-colors flex items-center gap-2"
+                        className="mt-5 text-base text-neon-cyan hover:text-neon-purple flex items-center gap-2"
                       >
                         {expandedExplanations[q.id] ? "收起解析" : "查看解析"}
                         {expandedExplanations[q.id] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
 
-                      {(showResults || expandedExplanations[q.id]) && (
+                      {/* 性能优化：只在展开时渲染解析内容 */}
+                      {expandedExplanations[q.id] && (
                         <div className="mt-4 p-5 bg-neon-cyan/10 rounded-xl border border-neon-cyan/20">
                           <p className="text-neon-cyan font-medium mb-2 flex items-center gap-2">
                             <CheckCircle2 className="w-5 h-5" />
@@ -436,11 +460,21 @@ export default function ProjectDetail() {
                   ))}
                 </div>
 
+                {/* 性能优化：加载更多题目按钮 */}
+                {visibleQuestions < detail.test.length && !showResults && (
+                  <button
+                    onClick={loadMoreQuestions}
+                    className="w-full mb-6 py-4 rounded-2xl border-2 border-neon-cyan/50 text-neon-cyan font-semibold hover:bg-neon-cyan/10 transition-colors"
+                  >
+                    加载更多题目 ({visibleQuestions}/{detail.test.length})
+                  </button>
+                )}
+
                 {!showResults ? (
                   <button
                     onClick={handleSubmitTest}
                     disabled={Object.keys(quizAnswers).length < detail.test.length}
-                    className="w-full py-5 rounded-2xl bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-bg font-bold text-xl hover:shadow-glow hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                    className="w-full py-5 rounded-2xl bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-bg font-bold text-xl hover:shadow-glow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   >
                     提交测试
                   </button>
@@ -448,24 +482,24 @@ export default function ProjectDetail() {
                   <div className="space-y-5">
                     <div
                       className={`p-8 rounded-2xl text-center border ${
-                        calculateScore() >= 80
+                        calculateScore >= 80
                           ? "bg-emerald-500/10 border-emerald-500/30"
                           : "bg-red-500/10 border-red-500/30"
                       }`}
                     >
                       <p
                         className={`text-5xl font-bold mb-3 ${
-                          calculateScore() >= 80 ? "text-emerald-400" : "text-red-400"
+                          calculateScore >= 80 ? "text-emerald-400" : "text-red-400"
                         }`}
                       >
-                        {calculateScore()} 分
+                        {calculateScore} 分
                       </p>
                       <p
                         className={`font-semibold text-xl ${
-                          calculateScore() >= 80 ? "text-emerald-300" : "text-red-300"
+                          calculateScore >= 80 ? "text-emerald-300" : "text-red-300"
                         }`}
                       >
-                        {calculateScore() >= 80 ? (
+                        {calculateScore >= 80 ? (
                           <span className="inline-flex items-center gap-3">
                             <CheckCircle2 className="w-7 h-7" />
                             测试通过，获得徽章！
@@ -476,11 +510,8 @@ export default function ProjectDetail() {
                       </p>
                     </div>
                     <button
-                      onClick={() => {
-                        setShowResults(false);
-                        setQuizAnswers({});
-                      }}
-                      className="w-full py-4 glass-card text-text-primary rounded-2xl font-semibold hover:bg-dark-card-hover transition-all text-lg"
+                      onClick={handleResetTest}
+                      className="w-full py-4 bg-dark-card-hover text-text-primary rounded-2xl font-semibold hover:bg-dark-card text-lg"
                     >
                       重新测试
                     </button>
