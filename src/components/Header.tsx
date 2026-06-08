@@ -44,8 +44,8 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-8">
             {[
               { id: "features", label: "核心卖点" },
-              { id: "path", label: "学习路径" },
               { id: "projects", label: "实战项目" },
+              { id: "path", label: "学习路径" },
               { id: "reviews", label: "学员评价" },
             ].map((item) => (
               <button
