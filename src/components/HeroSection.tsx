@@ -5,7 +5,7 @@ export function HeroSection() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const target = 1859;
+    const target = Math.floor(Math.random() * 500) + 1500;
     let current = 0;
     const increment = target / 50;
     const timer = setInterval(() => {
@@ -111,7 +111,7 @@ export function HeroSection() {
               {/* Avatar */}
               <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-neon-cyan to-neon-purple p-1 flex items-center justify-center">
                 <div className="w-full h-full rounded-full bg-dark-bg flex items-center justify-center text-5xl">
-                  🐼
+                  🐱
                 </div>
               </div>
 
