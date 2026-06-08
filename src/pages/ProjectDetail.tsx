@@ -155,46 +155,62 @@ export default function ProjectDetail() {
 
       {/* Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Learning module - 25% / 75% */}
+        {/* Learning module - 28% / 68% with 4% gap */}
         {activeTab === "learn" && (
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Left Panel - 25% */}
-            <div className="w-full md:w-1/4">
-              <div className="glass-card rounded-2xl p-6 sticky top-24">
-                <h3 className="text-lg font-bold text-text-primary mb-4">知识点目录</h3>
-                <div className="space-y-2">
+          <div className="flex flex-col md:flex-row gap-[4%]">
+            {/* Left Panel - 28% */}
+            <div className="w-full md:w-[28%]">
+              <div className="glass-card rounded-2xl p-6 sticky top-24 md:h-[calc(100vh-8rem)] md:overflow-y-auto">
+                <h3 className="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-neon-cyan" />
+                  知识点目录
+                </h3>
+                <div className="space-y-4">
                   {detail.learning.map((point, index) => (
-                    <div key={index} className="p-3 rounded-xl bg-dark-card-hover hover:border-neon-cyan/50 border border-transparent transition-all">
-                      <p className="text-sm font-medium text-text-primary">{point.title}</p>
+                    <div
+                      key={index}
+                      className="p-4 rounded-xl bg-dark-card-hover hover:border-neon-cyan/50 border border-transparent transition-all group cursor-pointer"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-dark-bg font-bold text-xs">{index + 1}</span>
+                        </div>
+                        <p className="text-sm font-medium text-text-primary leading-relaxed group-hover:text-neon-cyan transition-colors">
+                          {point.title}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Right Panel - 75% */}
-            <div className="w-full md:w-3/4 space-y-6">
+            {/* Right Panel - 68% */}
+            <div className="w-full md:w-[68%] space-y-8 md:py-4">
               {detail.learning.map((point, pointIndex) => (
-                <div key={pointIndex} className="glass-card rounded-2xl p-6">
-                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-text-primary">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center">
-                      <span className="text-dark-bg font-bold text-sm">{pointIndex + 1}</span>
+                <div key={pointIndex} className="glass-card rounded-2xl p-8">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-text-primary">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center">
+                      <span className="text-dark-bg font-bold">{pointIndex + 1}</span>
                     </div>
                     {point.title}
                   </h2>
 
-                  <p className="text-text-secondary mb-4">{point.content}</p>
+                  <p className="text-text-secondary mb-6 leading-relaxed text-base">{point.content}</p>
 
                   {point.codeExample && (
-                    <div className="bg-dark-bg rounded-xl p-4 mb-6 overflow-x-auto border border-dark-border">
-                      <pre className="font-mono text-sm text-neon-cyan">
+                    <div className="bg-dark-bg rounded-xl p-6 mb-8 overflow-x-auto border border-dark-border">
+                      <pre className="font-mono text-sm text-neon-cyan leading-relaxed">
                         <code>{point.codeExample}</code>
                       </pre>
                     </div>
                   )}
 
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-text-primary">理解自测</h3>
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-text-primary flex items-center gap-2 text-lg">
+                      <AlertCircle className="w-5 h-5 text-amber-400" />
+                      理解自测
+                    </h3>
                     {point.quiz.map((q, quizIndex) => {
                       const key = `${pointIndex}-${quizIndex}`;
                       const isExpanded = expandedQuiz[key];
@@ -202,26 +218,26 @@ export default function ProjectDetail() {
                         <div key={quizIndex} className="bg-dark-card-hover rounded-xl overflow-hidden">
                           <button
                             onClick={() => handleQuizToggle(pointIndex, quizIndex)}
-                            className="w-full p-4 text-left flex items-center justify-between"
+                            className="w-full p-5 text-left flex items-center justify-between hover:bg-dark-card transition-all"
                           >
-                            <span className="font-medium text-text-primary">
+                            <span className="font-medium text-text-primary text-base">
                               {quizIndex + 1}. {q.question}
                             </span>
                             {isExpanded ? (
-                              <ChevronUp className="w-5 h-5 text-text-secondary" />
+                              <ChevronUp className="w-5 h-5 text-text-secondary flex-shrink-0 ml-2" />
                             ) : (
-                              <ChevronDown className="w-5 h-5 text-text-secondary" />
+                              <ChevronDown className="w-5 h-5 text-text-secondary flex-shrink-0 ml-2" />
                             )}
                           </button>
                           {isExpanded && (
-                            <div className="px-4 pb-4 border-t border-dark-border pt-4">
-                              <div className="space-y-2 mb-4">
+                            <div className="px-5 pb-5 border-t border-dark-border pt-5">
+                              <div className="space-y-3 mb-5">
                                 {q.options?.map((option, optIdx) => {
                                   const isCorrect = option === q.answer;
                                   return (
                                     <div
                                       key={optIdx}
-                                      className={`p-3 rounded-lg ${
+                                      className={`p-4 rounded-lg leading-relaxed ${
                                         isCorrect
                                           ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                                           : "bg-dark-bg border border-dark-border text-text-secondary"
@@ -233,9 +249,12 @@ export default function ProjectDetail() {
                                   );
                                 })}
                               </div>
-                              <div className="p-4 bg-neon-cyan/10 rounded-lg border border-neon-cyan/20">
-                                <p className="text-neon-cyan font-medium mb-1">答案解析</p>
-                                <p className="text-text-secondary text-sm">{q.explanation}</p>
+                              <div className="p-5 bg-neon-cyan/10 rounded-xl border border-neon-cyan/20">
+                                <p className="text-neon-cyan font-medium mb-2 flex items-center gap-2">
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  答案解析
+                                </p>
+                                <p className="text-text-secondary leading-relaxed">{q.explanation}</p>
                               </div>
                             </div>
                           )}
@@ -249,15 +268,15 @@ export default function ProjectDetail() {
               <button
                 onClick={() => setLearnCompleted(true)}
                 disabled={learnCompleted}
-                className={`w-full py-4 rounded-2xl font-bold text-lg transition-all ${
+                className={`w-full py-5 rounded-2xl font-bold text-xl transition-all ${
                   learnCompleted
                     ? "bg-emerald-500/20 text-emerald-400 cursor-default"
                     : "bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-bg hover:shadow-glow hover:-translate-y-0.5"
                 }`}
               >
                 {learnCompleted ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Check className="w-5 h-5" />
+                  <span className="inline-flex items-center gap-3">
+                    <Check className="w-6 h-6" />
                     已标记为已学
                   </span>
                 ) : (
@@ -276,45 +295,59 @@ export default function ProjectDetail() {
           </div>
         )}
 
-        {/* Test module - 25% / 75% */}
+        {/* Test module - 28% / 68% with 4% gap */}
         {activeTab === "test" && (
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Left Panel - 25% */}
-            <div className="w-full md:w-1/4">
-              <div className="glass-card rounded-2xl p-6 sticky top-24">
-                <h3 className="text-lg font-bold text-text-primary mb-4">测试说明</h3>
+          <div className="flex flex-col md:flex-row gap-[4%]">
+            {/* Left Panel - 28% */}
+            <div className="w-full md:w-[28%]">
+              <div className="glass-card rounded-2xl p-6 sticky top-24 md:h-[calc(100vh-8rem)] md:overflow-y-auto">
+                <h3 className="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-neon-cyan" />
+                  测试说明
+                </h3>
                 <div className="space-y-4">
-                  <div className="p-4 bg-dark-card-hover rounded-xl">
-                    <p className="text-sm text-text-secondary mb-2">总分</p>
-                    <p className="text-3xl font-bold text-neon-cyan">100</p>
+                  <div className="p-5 bg-dark-card-hover rounded-xl">
+                    <p className="text-sm text-text-secondary mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-neon-cyan/20 text-neon-cyan flex items-center justify-center text-xs">分</span>
+                      总分
+                    </p>
+                    <p className="text-4xl font-bold text-neon-cyan leading-none">100</p>
                   </div>
-                  <div className="p-4 bg-dark-card-hover rounded-xl">
-                    <p className="text-sm text-text-secondary mb-2">通过分数</p>
-                    <p className="text-3xl font-bold text-amber-400">80</p>
+                  <div className="p-5 bg-dark-card-hover rounded-xl">
+                    <p className="text-sm text-text-secondary mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs">通</span>
+                      通过分数
+                    </p>
+                    <p className="text-4xl font-bold text-amber-400 leading-none">80</p>
                   </div>
-                  <div className="p-4 bg-dark-card-hover rounded-xl">
-                    <p className="text-sm text-text-secondary mb-2">题目数量</p>
-                    <p className="text-3xl font-bold text-neon-purple">{detail.test.length}</p>
+                  <div className="p-5 bg-dark-card-hover rounded-xl">
+                    <p className="text-sm text-text-secondary mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-neon-purple/20 text-neon-purple flex items-center justify-center text-xs">题</span>
+                      题目数量
+                    </p>
+                    <p className="text-4xl font-bold text-neon-purple leading-none">{detail.test.length}</p>
                   </div>
                 </div>
-                <div className="mt-6 pt-4 border-t border-dark-border">
-                  <p className="text-sm text-text-muted">
-                    💡 提示：完成所有题目后点击提交按钮
-                  </p>
+                <div className="mt-6 pt-5 border-t border-dark-border">
+                  <div className="p-4 bg-neon-cyan/10 rounded-xl border border-neon-cyan/20">
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      💡 完成所有题目后点击提交按钮，系统会自动计算得分
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Panel - 75% */}
-            <div className="w-full md:w-3/4">
-              <div className="glass-card rounded-2xl p-6">
+            {/* Right Panel - 68% */}
+            <div className="w-full md:w-[68%] md:py-4">
+              <div className="glass-card rounded-2xl p-8">
                 <div className="space-y-6 mb-8">
                   {detail.test.map((q) => (
-                    <div key={q.id} className="bg-dark-card-hover rounded-xl p-5">
-                      <p className="font-medium text-text-primary mb-4">
+                    <div key={q.id} className="bg-dark-card-hover rounded-xl p-6">
+                      <p className="font-medium text-text-primary mb-5 text-lg leading-relaxed">
                         {q.id}. {q.question}
                         {q.type !== "fill" && (
-                          <span className="text-text-secondary text-sm ml-2">
+                          <span className="text-text-secondary text-sm ml-3">
                             ({q.type === "choice" ? "选择题" : "判断题"})
                           </span>
                         )}
@@ -327,16 +360,16 @@ export default function ProjectDetail() {
                           onChange={(e) => handleTestAnswer(q.id, e.target.value)}
                           disabled={showResults}
                           placeholder="请填空..."
-                          className="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent"
+                          className="w-full px-5 py-4 bg-dark-bg border border-dark-border rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-neon-cyan focus:border-transparent text-base"
                         />
                       ) : q.type === "truefalse" ? (
-                        <div className="flex gap-3">
+                        <div className="flex gap-4">
                           {["正确", "错误"].map((option) => (
                             <button
                               key={option}
                               onClick={() => handleTestAnswer(q.id, option)}
                               disabled={showResults}
-                              className={`px-6 py-3 rounded-xl font-medium transition-all border ${
+                              className={`px-8 py-4 rounded-xl font-medium transition-all border text-base ${
                                 quizAnswers[q.id] === option
                                   ? "bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50"
                                   : "bg-dark-bg border-dark-border text-text-secondary hover:bg-dark-card-hover"
@@ -347,7 +380,7 @@ export default function ProjectDetail() {
                           ))}
                         </div>
                       ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {q.options?.map((option, optIdx) => {
                             const optionLetter = String.fromCharCode(65 + optIdx);
                             const isSelected = quizAnswers[q.id] === optionLetter;
@@ -366,14 +399,15 @@ export default function ProjectDetail() {
                                 key={optIdx}
                                 onClick={() => handleTestAnswer(q.id, optionLetter)}
                                 disabled={showResults}
-                                className={`w-full p-3 rounded-xl text-left font-medium transition-all ${bgClass}`}
+                                className={`w-full p-4 rounded-xl text-left font-medium transition-all ${bgClass}`}
                               >
-                                {optionLetter}. {option}
+                                <span className="font-bold mr-3">{optionLetter}.</span>
+                                {option}
                                 {showResults && String(q.correctAnswer) === optionLetter && (
-                                  <Check className="inline w-4 h-4 ml-2" />
+                                  <Check className="inline w-5 h-5 ml-2" />
                                 )}
                                 {showResults && isSelected && String(q.correctAnswer) !== optionLetter && (
-                                  <X className="inline w-4 h-4 ml-2" />
+                                  <X className="inline w-5 h-5 ml-2" />
                                 )}
                               </button>
                             );
@@ -383,15 +417,19 @@ export default function ProjectDetail() {
 
                       <button
                         onClick={() => toggleExplanation(q.id)}
-                        className="mt-4 text-sm text-neon-cyan hover:text-neon-purple transition-colors flex items-center gap-1"
+                        className="mt-5 text-base text-neon-cyan hover:text-neon-purple transition-colors flex items-center gap-2"
                       >
                         {expandedExplanations[q.id] ? "收起解析" : "查看解析"}
+                        {expandedExplanations[q.id] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
 
                       {(showResults || expandedExplanations[q.id]) && (
-                        <div className="mt-3 p-4 bg-neon-cyan/10 rounded-xl border border-neon-cyan/20">
-                          <p className="text-neon-cyan font-medium mb-1">答案解析</p>
-                          <p className="text-text-secondary text-sm">{q.explanation}</p>
+                        <div className="mt-4 p-5 bg-neon-cyan/10 rounded-xl border border-neon-cyan/20">
+                          <p className="text-neon-cyan font-medium mb-2 flex items-center gap-2">
+                            <CheckCircle2 className="w-5 h-5" />
+                            答案解析
+                          </p>
+                          <p className="text-text-secondary leading-relaxed">{q.explanation}</p>
                         </div>
                       )}
                     </div>
@@ -402,34 +440,34 @@ export default function ProjectDetail() {
                   <button
                     onClick={handleSubmitTest}
                     disabled={Object.keys(quizAnswers).length < detail.test.length}
-                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-bg font-bold text-lg hover:shadow-glow hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                    className="w-full py-5 rounded-2xl bg-gradient-to-r from-neon-cyan to-neon-purple text-dark-bg font-bold text-xl hover:shadow-glow hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   >
                     提交测试
                   </button>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <div
-                      className={`p-6 rounded-2xl text-center border ${
+                      className={`p-8 rounded-2xl text-center border ${
                         calculateScore() >= 80
                           ? "bg-emerald-500/10 border-emerald-500/30"
                           : "bg-red-500/10 border-red-500/30"
                       }`}
                     >
                       <p
-                        className={`text-4xl font-bold mb-2 ${
+                        className={`text-5xl font-bold mb-3 ${
                           calculateScore() >= 80 ? "text-emerald-400" : "text-red-400"
                         }`}
                       >
                         {calculateScore()} 分
                       </p>
                       <p
-                        className={`font-semibold text-lg ${
+                        className={`font-semibold text-xl ${
                           calculateScore() >= 80 ? "text-emerald-300" : "text-red-300"
                         }`}
                       >
                         {calculateScore() >= 80 ? (
-                          <span className="inline-flex items-center gap-2">
-                            <CheckCircle2 className="w-6 h-6" />
+                          <span className="inline-flex items-center gap-3">
+                            <CheckCircle2 className="w-7 h-7" />
                             测试通过，获得徽章！
                           </span>
                         ) : (
@@ -442,7 +480,7 @@ export default function ProjectDetail() {
                         setShowResults(false);
                         setQuizAnswers({});
                       }}
-                      className="w-full py-3 glass-card text-text-primary rounded-2xl font-semibold hover:bg-dark-card-hover transition-all"
+                      className="w-full py-4 glass-card text-text-primary rounded-2xl font-semibold hover:bg-dark-card-hover transition-all text-lg"
                     >
                       重新测试
                     </button>
