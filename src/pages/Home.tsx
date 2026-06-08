@@ -30,7 +30,9 @@ export default function Home() {
         </div>
 
         {/* 恢复原来的系统化学习路径卡片 */}
-        <StageCards />
+        <div id="path">
+          <StageCards />
+        </div>
 
         <div className="py-20">
           <div className="container mx-auto px-4">
