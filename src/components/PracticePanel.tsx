@@ -90,8 +90,8 @@ export default function PracticePanel({ projectId, practice }: PracticePanelProp
 
   return (
     <div className="flex gap-6 flex-col md:flex-row min-h-[600px]">
-      {/* Left Panel: Instructions - 30% */}
-      <div className="w-full md:w-3/10">
+      {/* Left Panel: Instructions - 25% */}
+      <div className="w-full md:w-1/4">
         <div className="glass-card rounded-2xl p-6 sticky top-24">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-cyan to-neon-purple flex items-center justify-center">
@@ -197,8 +197,8 @@ export default function PracticePanel({ projectId, practice }: PracticePanelProp
         </div>
       </div>
 
-      {/* Right Panel: Code Editor - 70% */}
-      <div className="w-full md:w-7/10 glass-card rounded-2xl overflow-hidden flex flex-col">
+      {/* Right Panel: Code Editor - 75% */}
+      <div className="w-full md:w-3/4 glass-card rounded-2xl overflow-hidden flex flex-col">
         <div className="px-4 py-3 border-b border-dark-border flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <div className="w-3 h-3 rounded-full bg-amber-500"></div>

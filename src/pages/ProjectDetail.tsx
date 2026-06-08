@@ -155,11 +155,11 @@ export default function ProjectDetail() {
 
       {/* Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Learning module - 30% / 70% */}
+        {/* Learning module - 25% / 75% */}
         {activeTab === "learn" && (
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Left Panel - 30% */}
-            <div className="w-full md:w-3/10">
+            {/* Left Panel - 25% */}
+            <div className="w-full md:w-1/4">
               <div className="glass-card rounded-2xl p-6 sticky top-24">
                 <h3 className="text-lg font-bold text-text-primary mb-4">知识点目录</h3>
                 <div className="space-y-2">
@@ -172,8 +172,8 @@ export default function ProjectDetail() {
               </div>
             </div>
 
-            {/* Right Panel - 70% */}
-            <div className="w-full md:w-7/10 space-y-6">
+            {/* Right Panel - 75% */}
+            <div className="w-full md:w-3/4 space-y-6">
               {detail.learning.map((point, pointIndex) => (
                 <div key={pointIndex} className="glass-card rounded-2xl p-6">
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-text-primary">
@@ -276,11 +276,11 @@ export default function ProjectDetail() {
           </div>
         )}
 
-        {/* Test module - 30% / 70% */}
+        {/* Test module - 25% / 75% */}
         {activeTab === "test" && (
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Left Panel - 30% */}
-            <div className="w-full md:w-3/10">
+            {/* Left Panel - 25% */}
+            <div className="w-full md:w-1/4">
               <div className="glass-card rounded-2xl p-6 sticky top-24">
                 <h3 className="text-lg font-bold text-text-primary mb-4">测试说明</h3>
                 <div className="space-y-4">
@@ -305,8 +305,8 @@ export default function ProjectDetail() {
               </div>
             </div>
 
-            {/* Right Panel - 70% */}
-            <div className="w-full md:w-7/10">
+            {/* Right Panel - 75% */}
+            <div className="w-full md:w-3/4">
               <div className="glass-card rounded-2xl p-6">
                 <div className="space-y-6 mb-8">
                   {detail.test.map((q) => (
